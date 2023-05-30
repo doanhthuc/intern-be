@@ -1,0 +1,3 @@
+= Easy Quizy Application Documentation
+:toc: left
+:toclevels: 1

@@ -1,0 +1,27 @@
+version: "2.4"
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: eqdb
+      POSTGRES_USER: easyquizy
+      POSTGRES_PASSWORD: mgmsecret
+    healthcheck:
+      # Checks whether Postgres is ready.
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready --username easyquizy --dbname eqdb",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+    networks:
+      - a12_compose
+
+networks:
+  a12_compose:
+    driver: bridge

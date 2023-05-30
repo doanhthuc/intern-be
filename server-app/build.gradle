@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    alias(gradlePluginLibs.plugins.spring.boot)
+    alias(gradlePluginLibs.plugins.spring.dependency.management)
+}
+
+dependencies {
+
+    // Spring
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.beans
+    annotationProcessor libs.spring.boot.configuration.processor
+
+    // lombok
+    implementation libs.lombok
+    annotationProcessor libs.lombok
+
+    // DB
+    implementation libs.h2
+    implementation libs.postgresql
+
+    // Test
+    testImplementation testCatalogLibs.groovy.all
+    testImplementation testCatalogLibs.spock.core
+    testImplementation testCatalogLibs.spock.spring
+    testImplementation testCatalogLibs.spring.boot.starter.test
+}

@@ -1,0 +1,11 @@
+plugins {
+    alias(gradlePluginLibs.plugins.docker.compose)
+}
+
+dockerCompose {
+    captureContainersOutput = true
+
+    postgres {
+        startedServices = ['postgres']
+    }
+}

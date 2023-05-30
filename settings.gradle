@@ -1,1 +1,50 @@
+enableFeaturePreview("VERSION_CATALOGS")
+
 rootProject.name = 'easy-quizy'
+
+include 'server-app'
+include 'compose'
+
+dependencyResolutionManagement {
+    def springBootVersion = '2.7.10'
+    versionCatalogs {
+        gradlePluginLibs {
+            version('spring-boot', springBootVersion)
+            version('spring-dependency-management', '1.1.0')
+            version('versions-update', '0.42.0')
+            version('docker-compose', '0.16.8')
+
+            plugin('spring-boot', 'org.springframework.boot').versionRef('spring-boot')
+            plugin('spring-dependency-management', 'io.spring.dependency-management').versionRef('spring-dependency-management')
+            plugin('versions-update', 'com.github.ben-manes.versions').versionRef('versions-update')
+            plugin('docker-compose', 'com.avast.gradle.docker-compose').versionRef('docker-compose')
+        }
+
+        libs {
+            version('spring-boot', springBootVersion)
+            version('lombok', '1.18.24')
+            version('postgresql', '42.3.2')
+
+            library('spring-boot-starter-web', 'org.springframework.boot', 'spring-boot-starter-web').withoutVersion()
+            library('spring-boot-starter-actuator', 'org.springframework.boot', 'spring-boot-starter-actuator').withoutVersion()
+            library('spring-boot-starter-data-jpa', 'org.springframework.boot', 'spring-boot-starter-data-jpa').withoutVersion()
+            library('spring-boot-configuration-processor', 'org.springframework.boot', 'spring-boot-configuration-processor').withoutVersion()
+            library('spring-boot-devtools', 'org.springframework.boot', 'spring-boot-devtools').withoutVersion()
+            library('spring-beans', 'org.springframework', 'spring-beans').withoutVersion()
+            library('lombok', 'org.projectlombok', 'lombok').versionRef('lombok')
+            library('h2', 'com.h2database', 'h2').withoutVersion()
+            library('postgresql', 'org.postgresql', 'postgresql').versionRef('postgresql')
+        }
+
+        testCatalogLibs {
+            version('groovy', '3.0.10')
+            version('spock', '2.0-groovy-3.0')
+
+            library('groovy-all', 'org.codehaus.groovy', 'groovy-all').versionRef('groovy')
+            library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
+            library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
+            library('spring-boot-starter-test', 'org.springframework.boot', 'spring-boot-starter-test').withoutVersion()
+        }
+    }
+}
+
