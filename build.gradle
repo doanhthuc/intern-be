@@ -4,6 +4,9 @@ plugins {
 
 allprojects {
 	apply plugin: 'base'
+	repositories {
+		mavenCentral()
+	}
 }
 
 subprojects {
