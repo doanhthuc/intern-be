@@ -1,9 +1,7 @@
 package com.mgmtp.easyquizy.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,6 +11,8 @@ import java.util.List;
 @Data
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class EventEntity {
     @Column(name = "location")
     private String location;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "quizzes")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "quizzes")
     @JsonIgnore
     private List<QuizEntity> quizEntity;
 

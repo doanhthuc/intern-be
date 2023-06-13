@@ -1,8 +1,6 @@
 package com.mgmtp.easyquizy.model;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -10,6 +8,8 @@ import javax.persistence.*;
 @Data
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuizEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,8 @@ public class QuizEntity {
     @Column(name = "title")
     private String title;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "quizzes_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quizzes_id", foreignKey = @ForeignKey(name = "fk_quizzes_events"), referencedColumnName = "id")
     private EventEntity eventEntity;
 }
