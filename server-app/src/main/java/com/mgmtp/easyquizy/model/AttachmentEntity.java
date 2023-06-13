@@ -22,6 +22,6 @@ public class AttachmentEntity {
     @Column(length = 20, nullable = false)
     private String Type;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachmentEntity")
     private QuestionEntity questionEntity;
 }
