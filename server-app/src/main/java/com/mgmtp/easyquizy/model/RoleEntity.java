@@ -19,6 +19,6 @@ public class RoleEntity {
     @Column(name = "name", length = 20, nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roleEntity")
     private List<UserEntity> users;
 }
