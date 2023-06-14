@@ -7,16 +7,14 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@Entity(name = "events")
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity(name = "events")
 public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "title")
     private String title;
@@ -27,8 +25,7 @@ public class EventEntity {
     @Column(name = "location")
     private String location;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "quizzes")
-    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "eventEntity")
     private List<QuizEntity> quizEntity;
 
 }

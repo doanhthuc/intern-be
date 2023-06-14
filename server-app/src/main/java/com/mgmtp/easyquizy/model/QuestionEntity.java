@@ -5,9 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "questions")
@@ -18,7 +16,7 @@ public class QuestionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "title", length = 200, nullable = false)
     private String title;
@@ -39,4 +37,12 @@ public class QuestionEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attachment_id", foreignKey = @ForeignKey(name = "FK_attachment_question"), referencedColumnName = "id")
     private AttachmentEntity attachmentEntity;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "questions_quizzes",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "quiz_id")
+    )
+    private List<QuizEntity> quizEntities;
 }
