@@ -1,14 +1,17 @@
 package com.mgmtp.easyquizy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "questions")
+@Builder
 public class QuestionEntity {
     public enum Difficulty {
         EASY, MEDIUM, HARD
@@ -27,7 +30,7 @@ public class QuestionEntity {
     @Column(name = "time_limit", nullable = false)
     private Integer timeLimit;
 
-    @OneToMany(mappedBy = "questionEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "questionEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<AnswerEntity> answerEntities;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,5 +47,6 @@ public class QuestionEntity {
             joinColumns = @JoinColumn(name = "question_id"),
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
+    @JsonIgnore
     private List<QuizEntity> quizEntities;
 }

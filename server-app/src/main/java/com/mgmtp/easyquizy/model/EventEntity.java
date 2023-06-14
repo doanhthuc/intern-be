@@ -7,10 +7,12 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "events")
+@Builder
 public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

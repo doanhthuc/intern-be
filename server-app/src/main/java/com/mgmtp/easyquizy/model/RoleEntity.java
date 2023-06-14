@@ -7,10 +7,12 @@ import javax.persistence.*;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "roles")
+@Builder
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,5 +22,6 @@ public class RoleEntity {
     private String name;
 
     @ManyToMany(mappedBy = "roleEntity")
+    @JsonIgnore
     private List<UserEntity> users;
 }

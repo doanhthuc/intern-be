@@ -1,13 +1,16 @@
 package com.mgmtp.easyquizy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "answers")
+@Builder
 public class AnswerEntity {
 
     @Id
@@ -22,6 +25,7 @@ public class AnswerEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "FK_answer_question"), referencedColumnName = "id")
+    @JsonIgnore
     private QuestionEntity questionEntity;
 
 

@@ -1,15 +1,18 @@
 package com.mgmtp.easyquizy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "quizzes")
+@Builder
 public class QuizEntity {
 
     @Id
@@ -21,6 +24,7 @@ public class QuizEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quizzes_id", foreignKey = @ForeignKey(name = "fk_quizzes_events"), referencedColumnName = "id")
+    @JsonIgnore
     private EventEntity eventEntity;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizEntities")

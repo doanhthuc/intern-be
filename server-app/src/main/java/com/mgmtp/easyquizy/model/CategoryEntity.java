@@ -1,14 +1,17 @@
 package com.mgmtp.easyquizy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "categories")
+@Builder
 public class CategoryEntity {
 
     @Id
@@ -19,6 +22,7 @@ public class CategoryEntity {
     private String name;
 
     @OneToMany(mappedBy = "categoryEntity", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<QuestionEntity> questionEntities;
 
 }
