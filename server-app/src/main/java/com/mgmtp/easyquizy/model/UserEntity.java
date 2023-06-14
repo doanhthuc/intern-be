@@ -7,8 +7,6 @@ import java.util.List;
 
 @Entity(name = "users")
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {
@@ -29,6 +27,6 @@ public class UserEntity {
     private String avatar;
 
     @ManyToMany
-    @JoinTable(name = "user_role", joinColumns = {@JoinColumn(name = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_id")})
+    @JoinTable(name = "user_role", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private List<RoleEntity> roleEntity;
 }

@@ -6,12 +6,11 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity(name = "roles")
+
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity(name = "roles")
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +20,5 @@ public class RoleEntity {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    @JsonIgnore
     private List<UserEntity> users;
 }
