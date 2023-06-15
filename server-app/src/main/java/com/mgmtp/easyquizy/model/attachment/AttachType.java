@@ -1,5 +1,5 @@
 package com.mgmtp.easyquizy.model.attachment;
 
-public enum TypeAttach {
+public enum AttachType {
     IMAGE, CODE
 }
