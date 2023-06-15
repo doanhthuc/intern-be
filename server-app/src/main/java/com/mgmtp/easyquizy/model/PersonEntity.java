@@ -11,7 +11,6 @@ import javax.persistence.*;
 @ToString
 @Entity(name="TBL_PERSONS")
 public class PersonEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
