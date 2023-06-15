@@ -1,6 +1,7 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mgmtp.easyquizy.model.UserEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,9 +15,6 @@ import java.util.List;
 @Entity(name = "roles")
 @Builder
 public class RoleEntity {
-    public enum RoleName {
-        IMAGE, CODE
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

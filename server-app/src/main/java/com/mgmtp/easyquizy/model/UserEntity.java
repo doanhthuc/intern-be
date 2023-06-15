@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.model;
 
+import com.mgmtp.easyquizy.model.user.RoleEntity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 

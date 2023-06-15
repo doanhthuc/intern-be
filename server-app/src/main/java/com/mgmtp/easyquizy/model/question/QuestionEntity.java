@@ -1,6 +1,10 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mgmtp.easyquizy.model.AnswerEntity;
+import com.mgmtp.easyquizy.model.CategoryEntity;
+import com.mgmtp.easyquizy.model.QuizEntity;
+import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,10 +17,6 @@ import java.util.List;
 @Entity(name = "questions")
 @Builder
 public class QuestionEntity {
-    public enum Difficulty {
-        EASY, MEDIUM, HARD
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

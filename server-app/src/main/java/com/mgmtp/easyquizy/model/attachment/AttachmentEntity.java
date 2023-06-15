@@ -1,6 +1,7 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.attachment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
@@ -13,10 +14,6 @@ import javax.persistence.*;
 @Entity(name = "attachments")
 @Builder
 public class AttachmentEntity {
-    public enum TypeAttach {
-        IMAGE, CODE
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
