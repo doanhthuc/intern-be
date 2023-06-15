@@ -14,7 +14,6 @@ import java.util.Map;
 @Entity(name = "quizzes")
 @Builder
 public class QuizEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,5 +28,4 @@ public class QuizEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizEntities")
     private List<QuestionEntity> questionEntities;
-
 }

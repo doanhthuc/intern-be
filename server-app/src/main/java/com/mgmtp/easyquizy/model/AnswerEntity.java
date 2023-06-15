@@ -12,7 +12,6 @@ import javax.persistence.*;
 @Entity(name = "answers")
 @Builder
 public class AnswerEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +26,4 @@ public class AnswerEntity {
     @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "FK_answer_question"), referencedColumnName = "id")
     @JsonIgnore
     private QuestionEntity questionEntity;
-
-
 }

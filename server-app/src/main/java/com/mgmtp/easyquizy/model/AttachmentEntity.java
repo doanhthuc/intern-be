@@ -13,6 +13,9 @@ import javax.persistence.*;
 @Entity(name = "attachments")
 @Builder
 public class AttachmentEntity {
+    public enum TypeAttach {
+        IMAGE, CODE
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +25,10 @@ public class AttachmentEntity {
     @Type(type = "text")
     private String content;
 
-    @Column(length = 20, nullable = false)
-    private String Type;
+    @Enumerated(EnumType.STRING)
+    private TypeAttach typeAttach;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachmentEntity")
     @JsonIgnore
     private QuestionEntity questionEntity;
-
 }

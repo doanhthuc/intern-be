@@ -13,7 +13,6 @@ import java.util.List;
 @Entity(name = "categories")
 @Builder
 public class CategoryEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,5 +23,4 @@ public class CategoryEntity {
     @OneToMany(mappedBy = "categoryEntity", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<QuestionEntity> questionEntities;
-
 }
