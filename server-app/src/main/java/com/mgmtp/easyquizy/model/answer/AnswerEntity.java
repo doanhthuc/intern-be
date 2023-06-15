@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.answer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;

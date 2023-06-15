@@ -1,6 +1,7 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.quiz;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mgmtp.easyquizy.model.event.EventEntity;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
 

@@ -1,9 +1,9 @@
 package com.mgmtp.easyquizy.model.question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mgmtp.easyquizy.model.AnswerEntity;
-import com.mgmtp.easyquizy.model.CategoryEntity;
-import com.mgmtp.easyquizy.model.QuizEntity;
+import com.mgmtp.easyquizy.model.answer.AnswerEntity;
+import com.mgmtp.easyquizy.model.category.CategoryEntity;
+import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
 import lombok.*;
 

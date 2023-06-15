@@ -1,7 +1,7 @@
-package com.mgmtp.easyquizy.model.user;
+package com.mgmtp.easyquizy.model.role;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mgmtp.easyquizy.model.UserEntity;
+import com.mgmtp.easyquizy.model.user.UserEntity;
 import lombok.*;
 
 import javax.persistence.*;

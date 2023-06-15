@@ -1,6 +1,6 @@
-package com.mgmtp.easyquizy.model;
+package com.mgmtp.easyquizy.model.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import lombok.*;
 
 import javax.persistence.*;
