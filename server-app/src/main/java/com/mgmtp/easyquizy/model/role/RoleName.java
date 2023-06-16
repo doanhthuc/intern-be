@@ -1,5 +1,5 @@
 package com.mgmtp.easyquizy.model.role;
 
 public enum RoleName {
-    IMAGE, CODE
+    ORGANIZER, ADMIN, QUESTION_MAKER, PARTICIPANT
 }

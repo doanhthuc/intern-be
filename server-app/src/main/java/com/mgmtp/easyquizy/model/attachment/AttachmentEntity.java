@@ -23,7 +23,7 @@ public class AttachmentEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private TypeAttach typeAttach;
+    private AttachmentType attachmentType;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachmentEntity")
     @JsonIgnore
