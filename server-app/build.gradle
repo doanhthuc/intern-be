@@ -12,6 +12,7 @@ dependencies {
     implementation libs.spring.boot.starter.actuator
     implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.beans
+    implementation libs.spring.boot.devtools
     annotationProcessor libs.spring.boot.configuration.processor
 
     // lombok
@@ -22,6 +23,8 @@ dependencies {
     implementation libs.h2
     implementation libs.postgresql
 
+    // OpenAPI
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
     // Test
     testImplementation testCatalogLibs.groovy.all
     testImplementation testCatalogLibs.spock.core

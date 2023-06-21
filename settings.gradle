@@ -34,6 +34,7 @@ dependencyResolutionManagement {
             library('lombok', 'org.projectlombok', 'lombok').versionRef('lombok')
             library('h2', 'com.h2database', 'h2').withoutVersion()
             library('postgresql', 'org.postgresql', 'postgresql').versionRef('postgresql')
+            include 'springdoc-openapi-ui'
         }
 
         testCatalogLibs {
