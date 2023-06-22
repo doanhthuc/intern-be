@@ -1,7 +1,8 @@
-package com.mgmtp.easyquizy.service;
+package com.mgmtp.easyquizy.service.impl;
 
 import com.mgmtp.easyquizy.model.category.CategoryEntity;
 import com.mgmtp.easyquizy.repository.CategoryRepository;
+import com.mgmtp.easyquizy.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -4,6 +4,7 @@ import com.mgmtp.easyquizy.dto.PersonDTO;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.model.PersonEntity;
 import com.mgmtp.easyquizy.service.PersonService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Person")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/person")
 public class PersonController {
-
     private final PersonService service;
 
     /**

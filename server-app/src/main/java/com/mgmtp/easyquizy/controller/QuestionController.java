@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Question")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/questions")
@@ -25,7 +28,7 @@ public class QuestionController {
     @Value("${easy-quizy.api.questions.default-page-size}")
     private int defaultPageSize;
 
-    @Operation(summary = "Get all questions with paging, filtering (if needed)")
+    @Operation(summary = "Get all questions with paging, filtering (if needed)", security = { @SecurityRequirement(name = "bearer-key") })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Found questions",
             content = {@Content(mediaType = "application/json")})
     })

@@ -1,10 +1,11 @@
-package com.mgmtp.easyquizy.service;
+package com.mgmtp.easyquizy.service.impl;
 
 import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
 import com.mgmtp.easyquizy.mapper.QuestionMapper;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.repository.QuestionRepository;
+import com.mgmtp.easyquizy.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository repository;
-
     @Autowired
     private QuestionMapper questionMapper;
 
@@ -32,29 +32,22 @@ public class QuestionServiceImpl implements QuestionService {
             String keyword, Difficulty difficulty, Integer categoryId, int offset, int limit) {
         int pageNo = offset / limit;
         Specification<QuestionEntity> filterSpec = (root, query, cb) -> {
-            // Create a list to hold the predicates
             List<Predicate> predicates = new ArrayList<>();
 
-            // Add a predicate for the title containing the keyword
             if (StringUtils.hasText(keyword)) {
                 predicates.add(cb.like(root.get("title"), "%" + keyword + "%"));
             }
-
-            // Add a predicate for the difficulty equaling the specified value
             if (difficulty != null) {
                 predicates.add(cb.equal(root.get("difficulty"), difficulty));
             }
             if (categoryId != null) {
                 predicates.add(cb.equal(root.get("categoryEntity").get("id"), categoryId));
             }
-            // Combine the predicates using the and() method
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        // Create a Pageable instance
         Pageable pageable = PageRequest.of(pageNo, limit);
 
-        // Use the findAll() method to execute the query
         Page<QuestionEntity> page = repository.findAll(filterSpec, pageable);
         return page.map(questionMapper::questionToQuestionListViewDTO);
     }

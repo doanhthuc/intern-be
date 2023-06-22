@@ -15,7 +15,6 @@ import java.util.List;
 @Entity(name = "roles")
 @Builder
 public class RoleEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +22,7 @@ public class RoleEntity {
     @Enumerated(EnumType.STRING)
     private RoleName roleName;
 
-    @ManyToMany(mappedBy = "roleEntity")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<UserEntity> users;
 }

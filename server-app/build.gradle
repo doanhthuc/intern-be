@@ -12,8 +12,16 @@ dependencies {
     implementation libs.spring.boot.starter.actuator
     implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.beans
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.devtools
+    implementation libs.swagger.models
     annotationProcessor libs.spring.boot.configuration.processor
+
+    //jjwt
+    implementation libs.jjwt.api
+    implementation libs.jjwt.impl
+    implementation libs.jjwt.jackson
 
     // lombok
     implementation libs.lombok
@@ -25,9 +33,15 @@ dependencies {
 
     // OpenAPI
     implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
     // Test
     testImplementation testCatalogLibs.groovy.all
     testImplementation testCatalogLibs.spock.core
     testImplementation testCatalogLibs.spock.spring
     testImplementation testCatalogLibs.spring.boot.starter.test
+
+    // mapper
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+
 }
