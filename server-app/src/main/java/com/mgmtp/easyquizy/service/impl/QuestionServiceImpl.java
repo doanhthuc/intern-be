@@ -35,7 +35,7 @@ public class QuestionServiceImpl implements QuestionService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (StringUtils.hasText(keyword)) {
-                predicates.add(cb.like(root.get("title"), "%" + keyword + "%"));
+                predicates.add(cb.like(cb.lower(root.get("title")), "%" + keyword.toLowerCase() + "%"));
             }
             if (difficulty != null) {
                 predicates.add(cb.equal(root.get("difficulty"), difficulty));
