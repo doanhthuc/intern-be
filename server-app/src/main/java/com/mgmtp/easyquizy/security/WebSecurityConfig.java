@@ -21,7 +21,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
 @EnableWebSecurity
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -85,6 +84,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/webjars/**"
                 ).permitAll()
                 .antMatchers("/questions/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString())
+                .antMatchers("/categories/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString(), RoleName.ORGANIZER.toString())
                 .antMatchers("/quizzes/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .antMatchers("/events/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .anyRequest().authenticated()

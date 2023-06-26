@@ -43,5 +43,6 @@ dependencies {
     // mapper
     implementation libs.mapstruct
     annotationProcessor libs.mapstruct.processor
+    implementation libs.flyway.core
 
 }

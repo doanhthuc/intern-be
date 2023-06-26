@@ -17,7 +17,7 @@ public class AnswerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 120, nullable = false)
+    @Column(length = 150, nullable = false)
     private String text;
 
     @Column(name = "is_correct", columnDefinition = "BIT", nullable = false)

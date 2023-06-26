@@ -19,11 +19,11 @@ public class QuizEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quizzes_id", foreignKey = @ForeignKey(name = "fk_quizzes_events"), referencedColumnName = "id")
+    @JoinColumn(name = "event_id", foreignKey = @ForeignKey(name = "fk_quizzes_events"), referencedColumnName = "id")
     @JsonIgnore
     private EventEntity eventEntity;
 
