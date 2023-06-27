@@ -29,6 +29,7 @@ dependencyResolutionManagement {
             version('mapstruct', '1.5.5.Final')
             version('flyway','9.19.4')
 
+            library('spring-boot-starter-validation', 'org.springframework.boot', 'spring-boot-starter-validation').withoutVersion()
             library('spring-boot-starter-security','org.springframework.boot','spring-boot-starter-security').withoutVersion()
             library('spring-boot-starter-validation', 'org.springframework.boot', 'spring-boot-starter-validation').withoutVersion()
             library('spring-boot-starter-web', 'org.springframework.boot', 'spring-boot-starter-web').withoutVersion()
@@ -48,7 +49,6 @@ dependencyResolutionManagement {
             library('swagger-models','io.swagger.core.v3','swagger-models').withoutVersion()
             library('flyway-core','org.flywaydb','flyway-core').versionRef('flyway')
             include 'springdoc-openapi-ui'
-
         }
 
         testCatalogLibs {

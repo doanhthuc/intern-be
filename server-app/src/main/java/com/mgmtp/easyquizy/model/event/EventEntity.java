@@ -1,16 +1,18 @@
 package com.mgmtp.easyquizy.model.event;
 
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "events")
 @Builder
 public class EventEntity {
@@ -22,10 +24,10 @@ public class EventEntity {
     private String title;
 
     @Column(name = "start_date", nullable = false)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "location", nullable = false)
     private String location;

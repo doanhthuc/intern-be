@@ -29,7 +29,7 @@ import javax.validation.constraints.Min;
 public class QuestionController {
     private final QuestionService questionService;
 
-    @Value("${easy-quizy.api.questions.default-page-size}")
+    @Value("${easy-quizy.api.default-page-size}")
     private int defaultPageSize;
 
     @Operation(summary = "Get all questions with paging, filtering (if needed)", security = {@SecurityRequirement(name = "bearer-key")})
