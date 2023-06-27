@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.service.impl;
+package com.mgmtp.easyquizy.service;
 
 import com.mgmtp.easyquizy.model.category.CategoryEntity;
 import com.mgmtp.easyquizy.repository.CategoryRepository;

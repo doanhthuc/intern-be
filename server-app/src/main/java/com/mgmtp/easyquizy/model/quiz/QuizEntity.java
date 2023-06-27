@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.event.EventEntity;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -27,6 +26,6 @@ public class QuizEntity {
     @JsonIgnore
     private EventEntity eventEntity;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizEntities")
-    private List<QuestionEntity> questionEntities;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizzes")
+    private List<QuestionEntity> questions;
 }

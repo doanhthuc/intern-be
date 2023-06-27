@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
 import org.hibernate.annotations.Type;
-
 import javax.persistence.*;
 
 @Getter
@@ -25,7 +24,7 @@ public class AttachmentEntity {
     @Enumerated(EnumType.STRING)
     private AttachmentType attachmentType;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachmentEntity")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachment")
     @JsonIgnore
-    private QuestionEntity questionEntity;
+    private QuestionEntity question;
 }

@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.service.impl;
+package com.mgmtp.easyquizy.service;
 
 import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;

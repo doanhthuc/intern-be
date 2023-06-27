@@ -1,8 +1,11 @@
 package com.mgmtp.easyquizy.controller;
 
+import com.mgmtp.easyquizy.dto.QuestionDTO;
 import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
+import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import com.mgmtp.easyquizy.service.QuestionService;
+import com.mgmtp.easyquizy.validator.QuestionDTOValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,12 +16,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
 @Tag(name = "Question")
@@ -28,13 +32,22 @@ import javax.validation.constraints.Min;
 @Validated
 public class QuestionController {
     private final QuestionService questionService;
+    private final QuestionDTOValidator questionDTOValidator;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.addValidators(questionDTOValidator);
+    }
 
     @Value("${easy-quizy.api.default-page-size}")
     private int defaultPageSize;
 
     @Operation(summary = "Get all questions with paging, filtering (if needed)", security = {@SecurityRequirement(name = "bearer-key")})
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Found questions",
-            content = {@Content(mediaType = "application/json")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found questions", content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail"),
+            @ApiResponse(responseCode = "400", description = "Invalid data")
     })
     @GetMapping
     public Page<QuestionListViewDTO> getAllQuestions(
@@ -54,5 +67,55 @@ public class QuestionController {
             limit = defaultPageSize;
         }
         return questionService.getAllQuestions(keyword, difficulty, categoryId, offset, limit);
+    }
+
+    @Operation(summary = "Get a question by its id", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found all questions", content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail"),
+            @ApiResponse(responseCode = "404", description = "Question not found")
+    })
+    @GetMapping("/{id}")
+    public QuestionDTO getQuestionById(@Parameter(description = "The ID of the question to get") @PathVariable Long id) throws RecordNotFoundException {
+        return questionService.getQuestionById(id);
+    }
+
+    @Operation(summary = "Create a new question", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Question created successfully", content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail"),
+            @ApiResponse(responseCode = "400", description = "Invalid question data")})
+    @PostMapping
+    public QuestionDTO createQuestion(@Valid @RequestBody QuestionDTO questionDTO) {
+        return questionService.createQuestion(questionDTO);
+    }
+
+    @Operation(summary = "Update an existing question", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Question updated successfully",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail"),
+            @ApiResponse(responseCode = "400", description = "Invalid question data"),
+            @ApiResponse(responseCode = "404", description = "Question not found")})
+    @PutMapping
+    public QuestionDTO updateQuestion(@Valid @RequestBody QuestionDTO questionDTO) throws RecordNotFoundException {
+        return questionService.updateQuestion(questionDTO);
+    }
+
+    @Operation(summary = "Delete a question by ID", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Question deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail"),
+            @ApiResponse(responseCode = "404", description = "Question not found")})
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuestion(
+            @Parameter(description = "The ID of the question to delete", example = "123")
+            @PathVariable Long id) throws RecordNotFoundException {
+        questionService.deleteQuestionById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

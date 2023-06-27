@@ -3,7 +3,6 @@ package com.mgmtp.easyquizy.model.category;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class CategoryEntity {
     @Column(name = "name", length = 20, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "categoryEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<QuestionEntity> questionEntities;
+    private List<QuestionEntity> questions;
 }

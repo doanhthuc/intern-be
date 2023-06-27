@@ -3,7 +3,6 @@ package com.mgmtp.easyquizy.model.answer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
-
 import javax.persistence.*;
 
 @Getter
@@ -20,11 +19,11 @@ public class AnswerEntity {
     @Column(length = 150, nullable = false)
     private String text;
 
-    @Column(name = "is_correct", columnDefinition = "BIT", nullable = false)
+    @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "FK_answer_question"), referencedColumnName = "id")
     @JsonIgnore
-    private QuestionEntity questionEntity;
+    private QuestionEntity question;
 }

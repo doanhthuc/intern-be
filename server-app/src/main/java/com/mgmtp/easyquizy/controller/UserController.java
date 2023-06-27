@@ -3,8 +3,6 @@ package com.mgmtp.easyquizy.controller;
 import com.mgmtp.easyquizy.dto.UserDTO;
 import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.user.UserEntity;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.security.SignatureException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

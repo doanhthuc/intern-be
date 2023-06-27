@@ -54,7 +54,7 @@ create table if not exists public.answers
 (
     id          bigserial
     primary key,
-    is_correct  bit          not null,
+    is_correct  boolean          not null,
     text        varchar(150) not null,
     question_id bigint
     constraint fk_answer_question

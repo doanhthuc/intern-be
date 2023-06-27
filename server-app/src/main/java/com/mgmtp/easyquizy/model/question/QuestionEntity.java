@@ -6,7 +6,6 @@ import com.mgmtp.easyquizy.model.category.CategoryEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -30,16 +29,16 @@ public class QuestionEntity {
     @Column(name = "time_limit", nullable = false)
     private Integer timeLimit;
 
-    @OneToMany(mappedBy = "questionEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<AnswerEntity> answerEntities;
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<AnswerEntity> answers;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "FK_category_question"), referencedColumnName = "id")
-    private CategoryEntity categoryEntity;
+    private CategoryEntity category;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "attachment_id", foreignKey = @ForeignKey(name = "FK_attachment_question"), referencedColumnName = "id")
-    private AttachmentEntity attachmentEntity;
+    private AttachmentEntity attachment;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -48,5 +47,12 @@ public class QuestionEntity {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @JsonIgnore
-    private List<QuizEntity> quizEntities;
+    private List<QuizEntity> quizzes;
+
+    public void setAnswers(List<AnswerEntity> answers) {
+        answers.forEach(answer -> {
+            answer.setQuestion(this);
+        });
+        this.answers = answers;
+    }
 }

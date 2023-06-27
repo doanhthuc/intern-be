@@ -3,10 +3,8 @@ package com.mgmtp.easyquizy.model.role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.List;
-
 
 @Getter
 @Setter
@@ -15,6 +13,7 @@ import java.util.List;
 @Entity(name = "roles")
 @Builder
 public class RoleEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
