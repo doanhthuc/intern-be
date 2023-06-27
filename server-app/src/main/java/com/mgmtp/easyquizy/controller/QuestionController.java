@@ -13,37 +13,43 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.Min;
+
 @Tag(name = "Question")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/questions")
+@Validated
 public class QuestionController {
     private final QuestionService questionService;
 
     @Value("${easy-quizy.api.questions.default-page-size}")
     private int defaultPageSize;
 
-    @Operation(summary = "Get all questions with paging, filtering (if needed)", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Get all questions with paging, filtering (if needed)", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Found questions",
             content = {@Content(mediaType = "application/json")})
     })
     @GetMapping
     public Page<QuestionListViewDTO> getAllQuestions(
             @Parameter(description = "The offset of the first result to return")
-            @RequestParam(name = "offset", defaultValue = "0") int offset,
+            @Min(value = 0, message = "Offset must be greater than or equal to 0")
+            @RequestParam(required = false, defaultValue = "0") int offset,
             @Parameter(description = "The maximum number of results to return")
-            @RequestParam(name = "limit", required = false) Integer limit,
+            @Min(value = 1, message = "Limit must be greater than or equal to 1")
+            @RequestParam(required = false) Integer limit,
             @Parameter(description = "The keyword to search for")
-            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(required = false) String keyword,
             @Parameter(description = "The difficulty level to filter by")
-            @RequestParam(name = "difficulty", required = false) Difficulty difficulty,
+            @RequestParam(required = false) Difficulty difficulty,
             @Parameter(description = "The ID of the category to filter by")
-            @RequestParam(name = "categoryId", required = false) Integer categoryId) {
+            @RequestParam(required = false) Integer categoryId){
         if (limit == null) {
             limit = defaultPageSize;
         }

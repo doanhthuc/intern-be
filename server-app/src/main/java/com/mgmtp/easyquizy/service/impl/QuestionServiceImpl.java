@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
-    private final QuestionRepository repository;
+    private final QuestionRepository questionRepository;
     @Autowired
     private QuestionMapper questionMapper;
 
@@ -48,7 +48,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Pageable pageable = PageRequest.of(pageNo, limit);
 
-        Page<QuestionEntity> page = repository.findAll(filterSpec, pageable);
+        Page<QuestionEntity> page = questionRepository.findAll(filterSpec, pageable);
         return page.map(questionMapper::questionToQuestionListViewDTO);
     }
 }
