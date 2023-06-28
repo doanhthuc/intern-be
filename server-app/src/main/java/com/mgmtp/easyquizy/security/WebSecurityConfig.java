@@ -1,7 +1,7 @@
 package com.mgmtp.easyquizy.security;
 
 import com.mgmtp.easyquizy.model.role.RoleName;
-import com.mgmtp.easyquizy.service.impl.UserServiceImpl;
+import com.mgmtp.easyquizy.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
