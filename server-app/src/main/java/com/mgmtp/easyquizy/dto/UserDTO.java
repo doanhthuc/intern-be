@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.dto;
 
+import com.mgmtp.easyquizy.model.role.RoleName;
 import lombok.*;
 
 import java.util.List;
@@ -14,5 +15,5 @@ public class UserDTO {
     private String username;
     private String name;
     private String avatar;
-    private List<RoleDTO> roles;
+    private List<RoleName> roles;
 }
