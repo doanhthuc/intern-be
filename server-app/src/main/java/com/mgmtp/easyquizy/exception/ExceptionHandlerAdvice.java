@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolation;
@@ -140,5 +141,20 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         error.put("error", "An internal server error occurred. Please try again later.");
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    /**
+     * Handles NoHandlerFoundException by returning a ResponseEntity with an error message and HttpStatus.NOT_FOUND.
+     * NoHandlerFoundException is thrown when the server cannot find a handler for a request, typically indicating that the requested resource does not exist.
+     *
+     * @return a ResponseEntity with an error message and HttpStatus.NOT_FOUND
+     */
+    @Override
+    public ResponseEntity<Object> handleNoHandlerFoundException(
+            NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Resource not found.");
+        return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.NOT_FOUND);
+    }
+
 }
 

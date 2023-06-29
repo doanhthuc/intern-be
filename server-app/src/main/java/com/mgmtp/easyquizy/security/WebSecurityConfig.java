@@ -70,23 +70,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/auth/**",
-                        "/h2-console/**",
-                        "/users/me",
-                        "/v2/api-docs",
-                        "/swagger-resources",
-                        "/swagger-resources/**",
-                        "/configuration/ui",
-                        "/configuration/security",
-                        "/swagger-ui/**",
-                        "/docs/**",
-                        "/docs.json/**",
-                        "/webjars/**"
+                .antMatchers(
+                        "/api/auth/**",
+                        "/api/h2-console/**",
+                        "/api/users/me",
+                        "/api/v2/api-docs",
+                        "/api/swagger-resources",
+                        "/api/swagger-resources/**",
+                        "/api/configuration/ui",
+                        "/api/configuration/security",
+                        "/api/swagger-ui/**",
+                        "/api/docs/**",
+                        "/api/docs.json/**",
+                        "/api/webjars/**"
                 ).permitAll()
-                .antMatchers("/questions/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString())
-                .antMatchers("/categories/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString(), RoleName.ORGANIZER.toString())
-                .antMatchers("/quizzes/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
-                .antMatchers("/events/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
+                .antMatchers("/api/questions/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString())
+                .antMatchers("/api/categories/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString(), RoleName.ORGANIZER.toString())
+                .antMatchers("/api/quizzes/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
+                .antMatchers("/api/events/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

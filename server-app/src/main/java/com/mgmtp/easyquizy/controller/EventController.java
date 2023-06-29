@@ -21,7 +21,7 @@ import javax.validation.constraints.Min;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/events")
+@RequestMapping("/api/events")
 @Validated
 public class EventController {
 

@@ -28,7 +28,7 @@ import javax.validation.constraints.Min;
 @Tag(name = "Question")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("/api/questions")
 @Validated
 public class QuestionController {
     private final QuestionService questionService;
