@@ -2,7 +2,7 @@ package com.mgmtp.easyquizy.controller;
 
 import com.mgmtp.easyquizy.dto.EventDTO;
 import com.mgmtp.easyquizy.service.EventServiceImpl;
-import com.mgmtp.easyquizy.validation.DateRangeValidator;
+import com.mgmtp.easyquizy.validator.DateRangeValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
+@Tag(name = "Event")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/events")

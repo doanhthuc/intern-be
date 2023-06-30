@@ -1,21 +1,20 @@
 package com.mgmtp.easyquizy.dto;
 
-import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @NoArgsConstructor(force = true)
 public class EventDTO {
-    @NotNull
     private Long id;
 
     @NotEmpty
+    @Size(max = 255, message = "Title must not be exceed 255 characters")
     private String title;
 
     @NotNull
@@ -25,7 +24,6 @@ public class EventDTO {
     private LocalDate endDate;
 
     @NotEmpty
+    @Size(max = 255, message = "Location must not be exceed 255 characters")
     private String location;
-
-    private List<QuizEntity> quizEntity;
 }

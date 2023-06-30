@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.validation;
+package com.mgmtp.easyquizy.validator;
 
 import com.mgmtp.easyquizy.dto.EventDTO;
 import org.springframework.stereotype.Component;
