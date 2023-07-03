@@ -1,7 +1,8 @@
 package com.mgmtp.easyquizy.dto;
 
 import lombok.*;
-import javax.validation.constraints.NotNull;
+
+import javax.validation.constraints.NotBlank;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,6 +12,6 @@ import javax.validation.constraints.NotNull;
 public class CategoryDTO {
     private Long id;
 
-    @NotNull(message = "Category is required")
+    @NotBlank(message = "Category is required")
     private String name;
 }

@@ -156,5 +156,15 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InvalidFieldsException.class)
+    public ResponseEntity<Object> handleBadRequestException(InvalidFieldsException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 }
 
