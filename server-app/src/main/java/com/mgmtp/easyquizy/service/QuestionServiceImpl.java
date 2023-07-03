@@ -53,18 +53,20 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public QuestionDTO createQuestion(QuestionDTO questionDTO) throws RecordNotFoundException {
+        questionDTO.setId(null);
+        QuestionEntity question = questionMapper.questionDTOToQuestion(questionDTO);
+
         CategoryEntity category = getCategoryById(questionDTO.getCategory().getId());
+        question.setCategory(category);
 
         List<AnswerDTO> answerDTOs = questionDTO.getAnswers();
-
         List<AnswerEntity> answers = answerDTOs.stream()
                 .map(answerMapper::answerDTOtoAnswer)
                 .toList();
-
-        QuestionEntity question = questionMapper.questionDTOToQuestion(questionDTO);
-        question.setCategory(category);
-
+        answers.forEach(answer -> answer.setId(null));
         question.setAnswers(answers);
+
+        question.getAttachment().setId(null);
 
         QuestionEntity savedQuestion = questionRepository.save(question);
 
@@ -81,28 +83,24 @@ public class QuestionServiceImpl implements QuestionService {
 
         QuestionEntity existingQuestion = questionRepository.findById(questionDTO.getId()).orElseThrow(() ->
                 new RecordNotFoundException("No Question record exists for the given id: " + questionDTO.getId()));
+        QuestionEntity question = questionMapper.questionDTOToQuestion(questionDTO);
 
-        if (questionDTO.getAttachment() != null) {
-            questionDTO.getAttachment().setId(null);
+        if (question.getAttachment() != null) {
+            question.getAttachment().setId(null);
         }
-
         if (existingQuestion.getAttachment() != null) {
             attachmentRepository.deleteById(existingQuestion.getAttachment().getId());
         }
 
         CategoryEntity category = getCategoryById(questionDTO.getCategory().getId());
-
-        QuestionEntity question = questionMapper.questionDTOToQuestion(questionDTO);
         question.setCategory(category);
 
         answerRepository.deleteByQuestionId(questionDTO.getId());
-
         List<AnswerDTO> answerDTOs = questionDTO.getAnswers();
-
         List<AnswerEntity> answers = answerDTOs.stream()
                 .map(answerMapper::answerDTOtoAnswer)
                 .toList();
-
+        answers.forEach(answer -> answer.setId(null));
         question.setAnswers(answers);
 
         QuestionEntity savedQuestion = questionRepository.save(question);
