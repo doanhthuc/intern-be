@@ -2,6 +2,7 @@ package com.mgmtp.easyquizy.service;
 
 import com.mgmtp.easyquizy.dto.QuestionDTO;
 import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
+import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ public interface QuestionService {
 
     QuestionDTO createQuestion(QuestionDTO questionDTO) throws RecordNotFoundException;
 
-    QuestionDTO updateQuestion(QuestionDTO questionDTO) throws RecordNotFoundException;
+    QuestionDTO updateQuestion(QuestionDTO questionDTO) throws RecordNotFoundException, InvalidFieldsException;
 
     void deleteQuestionById(Long id) throws RecordNotFoundException;
 

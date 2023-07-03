@@ -4,7 +4,6 @@ import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.repository.UserRepository;
 import com.mgmtp.easyquizy.security.JwtService;
-import com.mgmtp.easyquizy.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

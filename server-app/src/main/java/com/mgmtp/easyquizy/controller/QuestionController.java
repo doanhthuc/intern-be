@@ -2,6 +2,7 @@ package com.mgmtp.easyquizy.controller;
 
 import com.mgmtp.easyquizy.dto.QuestionDTO;
 import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
+import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import com.mgmtp.easyquizy.service.QuestionService;
@@ -62,7 +63,7 @@ public class QuestionController {
             @Parameter(description = "The difficulty level to filter by")
             @RequestParam(required = false) Difficulty difficulty,
             @Parameter(description = "The ID of the category to filter by")
-            @RequestParam(required = false) Integer categoryId){
+            @RequestParam(required = false) Integer categoryId) {
         if (limit == null) {
             limit = defaultPageSize;
         }
@@ -101,7 +102,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid question data"),
             @ApiResponse(responseCode = "404", description = "Question not found")})
     @PutMapping
-    public QuestionDTO updateQuestion(@Valid @RequestBody QuestionDTO questionDTO) throws RecordNotFoundException {
+    public QuestionDTO updateQuestion(@Valid @RequestBody QuestionDTO questionDTO) throws RecordNotFoundException, InvalidFieldsException {
         return questionService.updateQuestion(questionDTO);
     }
 

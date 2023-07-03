@@ -16,10 +16,16 @@ public class QuestionDTOValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         QuestionDTO questionDTOs = (QuestionDTO) target;
+
+        if (questionDTOs.getAnswers() == null) {
+            errors.rejectValue("answers", "answers.required", "Please provide at least one answer!!!");
+            return;
+        }
+
         long count = questionDTOs.getAnswers().stream()
                 .filter(AnswerDTO::getIsCorrect)
                 .count();
-        if(count != 1) {
+        if (count > 1) {
             errors.rejectValue("answers", "isCorrect.invalid", "Please select exactly one correct answer!!!");
         }
     }

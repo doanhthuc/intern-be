@@ -157,7 +157,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InvalidFieldsException.class)
-    public ResponseEntity<Object> handleBadRequestException(InvalidFieldsException ex) {
+    public ResponseEntity<Object> handleInvalidFieldsException(InvalidFieldsException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getFieldErrors().forEach(error -> {
             String fieldName = error.getField();

@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 public class AnswerDTO {
     private Long id;
 
-    @NotBlank(message = "Answer is required")
+    @NotBlank(message = "This field is required")
     @Size(max = 120, message = "Answer must not exceed 120 characters")
     private String text;
 
