@@ -66,7 +66,9 @@ public class QuestionServiceImpl implements QuestionService {
         answers.forEach(answer -> answer.setId(null));
         question.setAnswers(answers);
 
-        question.getAttachment().setId(null);
+        if (question.getAttachment() != null) {
+            question.getAttachment().setId(null);
+        }
 
         QuestionEntity savedQuestion = questionRepository.save(question);
 
