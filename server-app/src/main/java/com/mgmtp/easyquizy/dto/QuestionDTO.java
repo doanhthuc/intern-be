@@ -32,6 +32,8 @@ public class QuestionDTO {
     @Valid
     private List<AnswerDTO> answers;
 
+    @NotNull
+    @Valid
     private CategoryDTO category;
 
     @Valid
