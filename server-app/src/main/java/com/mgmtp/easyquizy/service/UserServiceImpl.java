@@ -1,6 +1,7 @@
 package com.mgmtp.easyquizy.service;
 
 import com.mgmtp.easyquizy.mapper.UserMapper;
+import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.repository.UserRepository;
 import com.mgmtp.easyquizy.security.JwtService;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,6 +25,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private UserMapper userMapper;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -42,5 +46,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException("Failed");
         }
         return userEntityOptional.get();
+    }
+
+    @Override
+    public void changePassword(UserEntity user,ChangePasswordRequest request) {
+        String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+        if (request.getNewPassword().equals(request.getCurrentPassword())) {
+            throw new RuntimeException("New password must be different from current password");
+        }
+        user.setPassword(encodedNewPassword);
+        userRepository.save(user);
     }
 }
