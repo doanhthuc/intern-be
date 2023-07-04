@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.CategoryDTO;
+import com.mgmtp.easyquizy.dto.CategoryInfoDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.CategoryMapper;
@@ -28,22 +28,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryEntity createCategory(CategoryDTO categoryDTO) {
-        if (categoryRepository.existsByName(categoryDTO.getName())) {
+    public CategoryEntity createCategory(CategoryInfoDTO categoryInfoDTO) {
+        if (categoryRepository.existsByName(categoryInfoDTO.getName())) {
             throw  InvalidFieldsException.fromFieldError("categoryName", "Category is existed");
         }
-        return categoryRepository.save(categoryMapper.categoryDtoToCategoryEntity(categoryDTO));
+        return categoryRepository.save(categoryMapper.categoryInfoDtoToCategoryEntity(categoryInfoDTO));
     }
 
     @Override
-    public CategoryEntity updateCategory(CategoryDTO categoryDTO) {
-        if (categoryDTO.getId() == null) {
+    public CategoryEntity updateCategory(CategoryInfoDTO categoryInfoDTO) {
+        if (categoryInfoDTO.getId() == null) {
             throw InvalidFieldsException.fromFieldError("categoryId", "ID is required");
         }
-        if (!categoryRepository.existsById(categoryDTO.getId())) {
+        if (!categoryRepository.existsById(categoryInfoDTO.getId())) {
             throw new RecordNotFoundException("Not found category");
         }
-        return categoryRepository.save(categoryMapper.categoryDtoToCategoryEntity(categoryDTO));
+        return categoryRepository.save(categoryMapper.categoryInfoDtoToCategoryEntity(categoryInfoDTO));
     }
 
     @Override

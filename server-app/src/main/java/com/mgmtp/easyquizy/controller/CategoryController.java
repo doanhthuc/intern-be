@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.CategoryDTO;
+import com.mgmtp.easyquizy.dto.CategoryInfoDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.model.category.CategoryEntity;
@@ -46,8 +46,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "401", description = "Authorization fail"),
             @ApiResponse(responseCode = "400", description = "Invalid category data")})
     @PostMapping
-    public CategoryEntity createCategory(@Valid @RequestBody CategoryDTO categoryDTO) throws InvalidFieldsException {
-        return categoryService.createCategory(categoryDTO);
+    public CategoryEntity createCategory(@Valid @RequestBody CategoryInfoDTO categoryInfoDTO) throws InvalidFieldsException {
+        return categoryService.createCategory(categoryInfoDTO);
     }
 
     @Operation(summary = "Update an existing category", security = {@SecurityRequirement(name = "bearer-key")})
@@ -59,8 +59,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "400", description = "Invalid category data"),
             @ApiResponse(responseCode = "404", description = "Category not found")})
     @PutMapping
-    public CategoryEntity updateCategory(@Valid @RequestBody CategoryDTO categoryDTO) throws RecordNotFoundException, InvalidFieldsException {
-        return categoryService.updateCategory(categoryDTO);
+    public CategoryEntity updateCategory(@Valid @RequestBody CategoryInfoDTO categoryInfoDTO) throws RecordNotFoundException, InvalidFieldsException {
+        return categoryService.updateCategory(categoryInfoDTO);
     }
 
     @Operation(summary = "Delete a category by ID", security = {@SecurityRequirement(name = "bearer-key")})
