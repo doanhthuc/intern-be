@@ -43,6 +43,9 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(categoryInfoDTO.getId())) {
             throw new RecordNotFoundException("Not found category");
         }
+        if (categoryRepository.existsByName(categoryInfoDTO.getName())) {
+            throw  InvalidFieldsException.fromFieldError("categoryName", "Category name is existed");
+        }
         return categoryRepository.save(categoryMapper.categoryInfoDtoToCategoryEntity(categoryInfoDTO));
     }
 

@@ -88,7 +88,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/questions/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString())
                 .antMatchers("/api/quizzes/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .antMatchers("/api/events/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
-                .antMatchers("/api/users/me").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
+                .antMatchers("/api/users/me").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
