@@ -1,9 +1,8 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.EventDTO;
-import com.mgmtp.easyquizy.dto.QuizDTO;
-import com.mgmtp.easyquizy.dto.QuizDtoDetail;
+import com.mgmtp.easyquizy.dto.*;
 import com.mgmtp.easyquizy.service.QuizServiceImpl;
+import com.mgmtp.easyquizy.validator.GenerateQuizRequestDTOValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,9 +14,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.util.List;
 
 @Tag(name = "Quiz")
 @RestController
@@ -28,6 +30,13 @@ public class QuizController {
 
     @Value("${easy-quizy.api.default-page-size}")
     private int defaultPageSize;
+
+    private final GenerateQuizRequestDTOValidator generateQuizRequestDTOValidator;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.addValidators(generateQuizRequestDTOValidator);
+    }
 
     /**
      * Create a new quiz
@@ -139,4 +148,19 @@ public class QuizController {
         quizService.deleteQuizById(id);
         return "DELETED";
     }
+
+    @Operation(summary = "Generate a quiz based on constraints", security = { @SecurityRequirement(name = "bearer-key") })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Generate a quiz successfully",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(type = "array",implementation = QuestionListViewDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Method arguments not valid"),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail")
+    })
+    @PostMapping("/generate")
+    public List<QuestionListViewDTO> generateQuiz(
+            @Valid @RequestBody GenerateQuizRequestDTO generateQuizRequestDTO) {
+        return quizService.generateQuiz(generateQuizRequestDTO);
+    }
+
 }

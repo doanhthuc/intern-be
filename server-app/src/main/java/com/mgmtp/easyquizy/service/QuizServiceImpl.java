@@ -1,19 +1,19 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.EventDTO;
-import com.mgmtp.easyquizy.dto.QuestionDTO;
-import com.mgmtp.easyquizy.dto.QuizDTO;
-import com.mgmtp.easyquizy.dto.QuizDtoDetail;
+import com.mgmtp.easyquizy.dto.*;
 import com.mgmtp.easyquizy.exception.DuplicatedQuestionException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.EventMapper;
+import com.mgmtp.easyquizy.mapper.QuestionMapper;
 import com.mgmtp.easyquizy.mapper.QuizMapper;
 import com.mgmtp.easyquizy.model.event.EventEntity;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
+import com.mgmtp.easyquizy.repository.CategoryRepository;
 import com.mgmtp.easyquizy.repository.EventRepository;
 import com.mgmtp.easyquizy.repository.QuestionRepository;
 import com.mgmtp.easyquizy.repository.QuizRepository;
+import com.mgmtp.easyquizy.utils.QuizGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -36,22 +37,26 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuestionRepository questionRepository;
 
+    private final CategoryRepository categoryRepository;
+
     private final QuizMapper quizMapper;
 
     private final EventMapper eventMapper;
 
+    private final QuestionMapper questionMapper;
+
     private final EventService eventService;
 
-    private List<QuestionEntity> createListQuestionEntity(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException{
+    private List<QuestionEntity> createListQuestionEntity(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException {
         List<Long> questionIds = quizDtoDetail.getQuestions()
                 .stream()
                 .map(QuestionDTO::getId).distinct()
                 .toList();
-        if(questionIds.size() != quizDtoDetail.getQuestions().size()) {
+        if (questionIds.size() != quizDtoDetail.getQuestions().size()) {
             throw new DuplicatedQuestionException("Duplicated question in the quiz");
         }
         List<QuestionEntity> questionEntityList = questionRepository.findAllById(questionIds);
-        if(questionEntityList.size() != quizDtoDetail.getQuestions().size()) {
+        if (questionEntityList.size() != quizDtoDetail.getQuestions().size()) {
             throw new RecordNotFoundException("No question records exist for the given id");
         }
         return questionEntityList;
@@ -131,5 +136,24 @@ public class QuizServiceImpl implements QuizService {
         quizEntity.getQuestions().forEach(
                 questionEntity -> questionEntity.getQuizzes().remove(quizEntity));
         quizRepository.deleteById(id);
+    }
+
+    @Override
+    public List<QuestionListViewDTO> generateQuiz(GenerateQuizRequestDTO generateQuizRequestDTO) {
+        // Validate category IDs
+        generateQuizRequestDTO.getCategoryPercentages().keySet().forEach(
+                categoryId -> {
+                    if (!categoryRepository.existsById(categoryId)) {
+                        throw new RecordNotFoundException("One or more categories with the given category IDs do not exist.");
+                    }
+                }
+        );
+        //  Get the questions for the required categories
+        Set<Long> requiredCategoryIds = generateQuizRequestDTO.getCategoryPercentages().keySet();
+        List<QuestionEntity> questions = questionRepository.findByCategoryIdIn(requiredCategoryIds);
+
+        //  Generate the quiz and convert to question list view dto
+        return QuizGenerator.generateQuiz(questions, generateQuizRequestDTO.getTotalTime(), generateQuizRequestDTO.getCategoryPercentages())
+                .stream().map(questionMapper::questionToQuestionListViewDTO).toList();
     }
 }

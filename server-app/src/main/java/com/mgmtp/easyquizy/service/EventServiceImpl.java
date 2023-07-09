@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ public class EventServiceImpl implements EventService {
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(pageNo, limit);
+        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").ascending());
         Page<EventEntity> page = eventRepository.findAll(filterSpec, pageable);
         return page.map(eventMapper::eventEntityToEventDto);
     }

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -139,7 +140,7 @@ public class QuestionServiceImpl implements QuestionService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(pageNo, limit);
+        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").ascending());
 
         Page<QuestionEntity> page = questionRepository.findAll(filterSpec, pageable);
         return page.map(questionMapper::questionToQuestionListViewDTO);
