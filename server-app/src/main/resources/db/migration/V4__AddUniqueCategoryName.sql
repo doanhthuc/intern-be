@@ -1,0 +1,1 @@
+ALTER TABLE public.categories ADD CONSTRAINT unique_category_name UNIQUE (name);
