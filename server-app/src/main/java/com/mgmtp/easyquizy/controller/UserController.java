@@ -5,6 +5,7 @@ import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.service.UserServiceImpl;
+import com.mgmtp.easyquizy.validator.StrongPasswordValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,7 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Tag(name = "User")
 @RestController
@@ -28,6 +32,13 @@ public class UserController {
 
     @Autowired
     UserServiceImpl userService;
+
+    @Autowired
+    private StrongPasswordValidator strongPasswordValidator;
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.addValidators(strongPasswordValidator);
+    }
 
     @Operation(summary = "Get user information by JWT", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
@@ -56,7 +67,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Authorization fail")
     })
     @PutMapping("/me/password")
-    public ResponseEntity<UserDTO> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<UserDTO> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();

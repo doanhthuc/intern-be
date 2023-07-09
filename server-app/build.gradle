@@ -46,4 +46,6 @@ dependencies {
     annotationProcessor libs.mapstruct.processor
     implementation libs.flyway.core
 
+    // passay
+    implementation libs.passay
 }

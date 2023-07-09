@@ -45,6 +45,7 @@ dependencyResolutionManagement {
             library('mapstruct-processor','org.mapstruct','mapstruct-processor').versionRef('mapstruct')
             library('swagger-models','io.swagger.core.v3','swagger-models').withoutVersion()
             library('flyway-core','org.flywaydb','flyway-core').versionRef('flyway')
+            library('passay','org.passay','passay').version('1.6.0')
             include 'springdoc-openapi-ui'
         }
 
