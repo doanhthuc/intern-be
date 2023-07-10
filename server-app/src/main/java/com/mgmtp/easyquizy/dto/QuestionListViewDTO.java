@@ -13,4 +13,5 @@ public class QuestionListViewDTO {
     private String title;
     private Difficulty difficulty;
     private String categoryName;
+    private Integer timeLimit;
 }
