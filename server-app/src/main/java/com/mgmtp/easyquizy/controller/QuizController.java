@@ -24,7 +24,7 @@ import java.util.List;
 @Tag(name = "Quiz")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/quizzes")
+@RequestMapping("/api/quizzes")
 public class QuizController {
     private final QuizServiceImpl quizService;
 
