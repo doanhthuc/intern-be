@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
+import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.user.UserEntity;
@@ -49,13 +50,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void changePassword(UserEntity user,ChangePasswordRequest request) {
+    public void changePassword(UserEntity user,ChangePasswordRequest request) throws InvalidFieldsException {
         String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new RuntimeException("Current password is incorrect.");
+            throw InvalidFieldsException.fromFieldError("currentPassword","Current password is incorrect.");
         }
         if (request.getNewPassword().equals(request.getCurrentPassword())) {
-            throw new RuntimeException("New password must be different from current password");
+            throw InvalidFieldsException.fromFieldError("newPassword","New password must be different from current password");
         }
         user.setPassword(encodedNewPassword);
         userRepository.save(user);
