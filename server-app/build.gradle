@@ -1,8 +1,26 @@
 plugins {
     id 'java'
     id 'groovy'
+    id "org.sonarqube" version "3.5.0.2730"
     alias(gradlePluginLibs.plugins.spring.boot)
     alias(gradlePluginLibs.plugins.spring.dependency.management)
+}
+
+/** ---- SONAR CONFIGURATION ---- **/
+sonar {
+    properties {
+        property "sonar.projectKey", "Easy-Quizy"
+        property "sonar.scm.provider", "git"
+        property "sonar.qualitygate.wait", true
+        property "sonar.language", "java"
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/groovy"
+        if (System.env.BRANCH_NAME != 'develop') {
+            property "sonar.pullrequest.key", System.env.BRANCH_NAME
+            property "sonar.pullrequest.branch", System.env.BRANCH_NAME
+            property "sonar.pullrequest.base", 'develop'
+        }
+    }
 }
 
 dependencies {
