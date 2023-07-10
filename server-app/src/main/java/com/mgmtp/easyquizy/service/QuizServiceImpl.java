@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 @Slf4j
@@ -41,22 +42,17 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizMapper quizMapper;
 
-    private final EventMapper eventMapper;
-
     private final QuestionMapper questionMapper;
 
     private final EventService eventService;
 
-    private List<QuestionEntity> createListQuestionEntity(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException {
-        List<Long> questionIds = quizDtoDetail.getQuestions()
-                .stream()
-                .map(QuestionDTO::getId).distinct()
-                .toList();
-        if (questionIds.size() != quizDtoDetail.getQuestions().size()) {
+    private List<QuestionEntity> createListQuestionEntity(List<Long> questionIds) throws RecordNotFoundException, DuplicatedQuestionException{
+        List<Long> distinctQuestionIds = questionIds.stream().distinct().toList();
+        if(distinctQuestionIds.size() != questionIds.size()) {
             throw new DuplicatedQuestionException("Duplicated question in the quiz");
         }
-        List<QuestionEntity> questionEntityList = questionRepository.findAllById(questionIds);
-        if (questionEntityList.size() != quizDtoDetail.getQuestions().size()) {
+        List<QuestionEntity> questionEntityList = questionRepository.findAllById(distinctQuestionIds);
+        if(questionEntityList.size() != questionIds.size()) {
             throw new RecordNotFoundException("No question records exist for the given id");
         }
         return questionEntityList;
@@ -66,17 +62,18 @@ public class QuizServiceImpl implements QuizService {
         return questionEntities.stream().map(QuestionEntity::getTimeLimit).mapToInt(Integer::intValue).sum();
     }
 
-    public QuizDtoDetail createQuiz(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException {
-        EventEntity eventEntity = eventRepository.findById(quizDtoDetail.getEvent().getId())
+    public QuizDTO createQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException {
+        EventEntity eventEntity = eventRepository.findById(quizDTO.getEventId())
                 .orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
-        QuizEntity createdQuiz = quizMapper.quizDtoDetailToQuizEntity(quizDtoDetail);
-        List<QuestionEntity> questionEntities = createListQuestionEntity(quizDtoDetail);
+        QuizEntity createdQuiz = quizMapper.quizDtoToQuizEntity(quizDTO);
+        createdQuiz.setEventEntity(eventEntity);
+        List<QuestionEntity> questionEntities = createListQuestionEntity(quizDTO.getQuestionIds());
         createdQuiz.setEventEntity(eventEntity);
         createdQuiz.setQuestions(questionEntities);
-        questionEntities.forEach(questionEntity -> questionEntity.getQuizzes().add(createdQuiz));
         quizRepository.save(createdQuiz);
-        QuizDtoDetail result = quizMapper.quizEntityToQuizDtoDetail(createdQuiz);
+        QuizDTO result = quizMapper.quizEntityToQuizDTO(createdQuiz);
         result.setTotalTime(calculateTotalTime(questionEntities));
+        result.setQuestionIds(createdQuiz.getQuestions().stream().map(QuestionEntity::getId).toList());
         return result;
     }
 
@@ -96,10 +93,14 @@ public class QuizServiceImpl implements QuizService {
         };
         Pageable pageable = PageRequest.of(pageNo, limit);
         Page<QuizEntity> page = quizRepository.findAll(filterSpec, pageable);
-        List<List<QuestionEntity>> questionEntities = new ArrayList<>();
-        page.getContent().forEach(quizEntity -> questionEntities.add(quizEntity.getQuestions()));
+        List<List<QuestionEntity>> listQuestionEntities = new ArrayList<>();
+        page.getContent().forEach(quizEntity -> listQuestionEntities.add(quizEntity.getQuestions()));
         Page<QuizDTO> quizDTOPage = page.map(quizMapper::quizEntityToQuizDTO);
-        quizDTOPage.forEach(quizDTO -> quizDTO.setTotalTime(calculateTotalTime(questionEntities.remove(0))));
+        quizDTOPage.forEach(quizDTO -> {
+            List<QuestionEntity> questionEntities = listQuestionEntities.remove(0);
+            quizDTO.setQuestionIds(questionEntities.stream().map(QuestionEntity::getId).collect(Collectors.toList()));
+            quizDTO.setTotalTime(calculateTotalTime(questionEntities));
+        });
         return quizDTOPage;
     }
 
@@ -113,19 +114,21 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizDtoDetail updateQuiz(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException {
-        QuizEntity updatedQuiz = quizRepository.findById(quizDtoDetail.getId())
+    public QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException {
+        QuizEntity updatedQuiz = quizRepository.findById(quizDTO.getId())
                 .orElseThrow(() -> new RecordNotFoundException("No quiz records exist for the given id "));
-        List<QuestionEntity> questionEntities = createListQuestionEntity(quizDtoDetail);
-        updatedQuiz.setId(quizDtoDetail.getId());
-        updatedQuiz.setTitle(quizDtoDetail.getTitle());
-        updatedQuiz.setEventEntity(eventMapper.eventDtoToEventEntity(quizDtoDetail.getEvent()));
-        quizRepository.removeQuestionFromQuiz(quizDtoDetail.getId());
-        questionEntities.forEach(questionEntity -> questionEntity.getQuizzes().add(updatedQuiz));
+        EventEntity eventEntity = eventRepository.findById(quizDTO.getEventId())
+                .orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
+        List<QuestionEntity> questionEntities = createListQuestionEntity(quizDTO.getQuestionIds());
+        updatedQuiz.setId(quizDTO.getId());
+        updatedQuiz.setTitle(quizDTO.getTitle());
+        updatedQuiz.setEventEntity(eventEntity);
+        quizRepository.removeQuestionFromQuiz(quizDTO.getId());
         updatedQuiz.setQuestions(questionEntities);
         quizRepository.save(updatedQuiz);
-        QuizDtoDetail result = quizMapper.quizEntityToQuizDtoDetail(updatedQuiz);
+        QuizDTO result = quizMapper.quizEntityToQuizDTO(updatedQuiz);
         result.setTotalTime(calculateTotalTime(updatedQuiz.getQuestions()));
+        result.setQuestionIds(updatedQuiz.getQuestions().stream().map(QuestionEntity::getId).toList());
         return result;
     }
 

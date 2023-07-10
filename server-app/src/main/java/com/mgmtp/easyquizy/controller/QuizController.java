@@ -33,7 +33,7 @@ public class QuizController {
 
     private final GenerateQuizRequestDTOValidator generateQuizRequestDTOValidator;
 
-    @InitBinder
+    @InitBinder("generateQuizRequestDTO")
     public void initBinder(WebDataBinder binder) {
         binder.addValidators(generateQuizRequestDTOValidator);
     }
@@ -52,9 +52,9 @@ public class QuizController {
             @ApiResponse(responseCode = "401", description = "Authorization fail")
     })
     @PostMapping
-    public QuizDtoDetail createQuiz(
+    public QuizDTO createQuiz(
             @Parameter(description = "Quiz's information")
-            @Valid @RequestBody QuizDtoDetail quiz) {
+            @Valid @RequestBody QuizDTO quiz) {
         return quizService.createQuiz(quiz);
     }
 
@@ -123,9 +123,9 @@ public class QuizController {
             @ApiResponse(responseCode = "401", description = "Authorization fail")
     })
     @PutMapping
-    public QuizDtoDetail updateQuiz(
+    public QuizDTO updateQuiz(
             @Parameter(description = "Quiz's information")
-            @Valid @RequestBody QuizDtoDetail quiz) {
+            @Valid @RequestBody QuizDTO quiz) {
         return quizService.updateQuiz(quiz);
     }
 

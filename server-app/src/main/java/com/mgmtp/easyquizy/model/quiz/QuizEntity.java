@@ -28,4 +28,9 @@ public class QuizEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizzes")
     private List<QuestionEntity> questions;
+
+    public void setQuestions(List<QuestionEntity> questions) {
+        this.questions = questions;
+        questions.forEach(questionEntity -> questionEntity.getQuizzes().add(this));
+    }
 }

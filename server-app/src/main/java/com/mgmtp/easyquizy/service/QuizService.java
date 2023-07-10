@@ -12,13 +12,13 @@ import java.util.List;
 
 public interface QuizService {
 
-    QuizDtoDetail createQuiz(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException;
+    QuizDTO createQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException;
 
     Page<QuizDTO> getAllQuizOfEvent(Long eventId, String keyword, int offset, int limit) throws RecordNotFoundException;
 
     QuizDtoDetail getQuizById(Long id) throws RecordNotFoundException;
 
-    QuizDtoDetail updateQuiz(QuizDtoDetail quizDtoDetail) throws RecordNotFoundException, DuplicatedQuestionException;
+    QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException;
 
     void deleteQuizById(Long id) throws RecordNotFoundException;
 

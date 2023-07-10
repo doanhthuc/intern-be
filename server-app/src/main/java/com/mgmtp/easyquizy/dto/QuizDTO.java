@@ -3,8 +3,7 @@ package com.mgmtp.easyquizy.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.List;
 
 @Data
@@ -16,7 +15,13 @@ public class QuizDTO {
     @Size(max = 255, message = "Title must not be exceed 255 characters")
     private String title;
 
-    private EventDTO event;
+    @NotNull(message = "Please enter a valid number in this field")
+    @Positive(message = "Event's ID must be greater than zero")
+    private Long eventId;
+
+    @NotNull(message = "This field is required")
+    @Size(min = 1, message = "At least one question must be selected")
+    private List<Long> questionIds;
 
     private Integer totalTime;
 }
