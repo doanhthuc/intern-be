@@ -166,5 +166,20 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         });
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Handles HttpDuplicatedQuestionException by returning a ResponseEntity with a map of field errors and HttpStatus.BAD_REQUEST.
+     * HttpDuplicatedQuestionException will be thrown when @RequestBody data contain duplication questions from json.
+     *
+     * @return a ResponseEntity with an error message and HttpStatus.BAD_REQUEST
+     */
+    @ExceptionHandler(value = {DuplicatedQuestionException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleDuplicatedQuestionException(DuplicatedQuestionException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put("error", message);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 }
 

@@ -65,10 +65,10 @@ public class QuizServiceImpl implements QuizService {
     public QuizDTO createQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException {
         EventEntity eventEntity = eventRepository.findById(quizDTO.getEventId())
                 .orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
-        QuizEntity createdQuiz = quizMapper.quizDtoToQuizEntity(quizDTO);
+        QuizEntity createdQuiz = new QuizEntity();
+        createdQuiz.setTitle(quizDTO.getTitle());
         createdQuiz.setEventEntity(eventEntity);
         List<QuestionEntity> questionEntities = createListQuestionEntity(quizDTO.getQuestionIds());
-        createdQuiz.setEventEntity(eventEntity);
         createdQuiz.setQuestions(questionEntities);
         quizRepository.save(createdQuiz);
         QuizDTO result = quizMapper.quizEntityToQuizDTO(createdQuiz);

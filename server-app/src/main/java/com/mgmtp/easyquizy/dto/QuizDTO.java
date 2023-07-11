@@ -15,12 +15,12 @@ public class QuizDTO {
     @Size(max = 255, message = "Title must not be exceed 255 characters")
     private String title;
 
-    @NotNull(message = "Please enter a valid number in this field")
+    @NotNull(message = "This field is required")
     @Positive(message = "Event's ID must be greater than zero")
     private Long eventId;
 
     @NotNull(message = "This field is required")
-    @Size(min = 1, message = "At least one question must be selected")
+    @Size(min = 1, message = "The list must contain at least one question")
     private List<Long> questionIds;
 
     private Integer totalTime;
