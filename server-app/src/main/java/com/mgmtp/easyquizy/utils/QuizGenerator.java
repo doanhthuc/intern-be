@@ -79,7 +79,7 @@ public class QuizGenerator {
             }
             //  Check if the current time limit of the quiz is exceeded
             if (quizTotalTime >= totalTime) {
-                return quiz;
+                break;
             }
         }
         // Check if the quiz total time is good enough
@@ -95,10 +95,14 @@ public class QuizGenerator {
                 quiz.add(questionEntity);
                 quizTotalTime += questionEntity.getTimeLimit();
                 if (quizTotalTime >= totalTime) {
-                    return quiz;
+                    break;
                 }
             }
         }
+
+        // Shuffle the quiz to avoid any patterns in questions’ ordering caused by the algorithm
+        Collections.shuffle(quiz);
+
         return quiz;
     }
 }
