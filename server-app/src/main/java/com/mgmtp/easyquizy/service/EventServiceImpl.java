@@ -44,7 +44,7 @@ public class EventServiceImpl implements EventService {
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").descending());
         Page<EventEntity> page = eventRepository.findAll(filterSpec, pageable);
         return page.map(eventMapper::eventEntityToEventDto);
     }

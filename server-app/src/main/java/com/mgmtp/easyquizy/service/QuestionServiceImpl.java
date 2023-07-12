@@ -140,7 +140,7 @@ public class QuestionServiceImpl implements QuestionService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").descending());
 
         Page<QuestionEntity> page = questionRepository.findAll(filterSpec, pageable);
         return page.map(questionMapper::questionToQuestionListViewDTO);
