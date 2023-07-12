@@ -18,7 +18,10 @@ public class StrongPasswordValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         ChangePasswordRequest request = (ChangePasswordRequest) target;
-
+        if (((ChangePasswordRequest) target).getNewPassword().isEmpty()){
+            errors.rejectValue("newPassword", "password.empty","This is a required field");
+            return;
+        }
         PasswordValidator validator = new PasswordValidator(Arrays.asList(
                 new LengthRule(8,255),
                 new CharacterRule(EnglishCharacterData.UpperCase, 1),
@@ -29,7 +32,7 @@ public class StrongPasswordValidator implements Validator {
         RuleResult result = validator.validate(new PasswordData(request.getNewPassword()));
 
         if (!result.isValid()) {
-            errors.rejectValue("currentPassword", "password.invalid","New password must contain at least 8 characters, including one uppercase letter, one lowercase letter, and one digit, one special character.");
+            errors.rejectValue("newPassword", "password.invalid","New password must contain at least 8 characters, including one uppercase letter, one lowercase letter, and one digit, one special character.");
         }
     }
 }
