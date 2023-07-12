@@ -2,6 +2,7 @@ package com.mgmtp.easyquizy.service;
 
 import com.mgmtp.easyquizy.dto.*;
 import com.mgmtp.easyquizy.exception.DuplicatedQuestionException;
+import com.mgmtp.easyquizy.exception.NoMatchEventIdException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.EventMapper;
 import com.mgmtp.easyquizy.mapper.QuestionMapper;
@@ -115,11 +116,13 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException {
+    public QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException, NoMatchEventIdException {
         QuizEntity updatedQuiz = quizRepository.findById(quizDTO.getId())
                 .orElseThrow(() -> new RecordNotFoundException("No quiz records exist for the given id "));
-        EventEntity eventEntity = eventRepository.findById(quizDTO.getEventId())
+        EventEntity eventEntity = eventRepository.findById(updatedQuiz.getEventEntity().getId())
                 .orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
+        if (!eventEntity.getId().equals(quizDTO.getEventId()))
+            throw new NoMatchEventIdException("Event's id does not match with exist quiz");
         List<QuestionEntity> questionEntities = createListQuestionEntity(quizDTO.getQuestionIds());
         updatedQuiz.setId(quizDTO.getId());
         updatedQuiz.setTitle(quizDTO.getTitle());

@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
+    static final String ERROR = "error";
+
     /**
      * This method handles ConstraintViolationException by returning a map of errors.
      * ConstraintViolationException will be thrown when bean validation fails for request params or path variables.
@@ -87,7 +89,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException ex) {
         Map<String, String> errors = new HashMap<>();
         String message = ex.getMessage();
-        errors.put("error", message);
+        errors.put(ERROR, message);
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
@@ -125,7 +127,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
             error.put(fieldName, message);
         } else {
             String message = "Invalid request body format.";
-            error.put("error", message);
+            error.put(ERROR, message);
         }
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
@@ -138,7 +140,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler({Exception.class})
     public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "An internal server error occurred. Please try again later.");
+        error.put(ERROR, "An internal server error occurred. Please try again later.");
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -152,7 +154,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleNoHandlerFoundException(
             NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Resource not found.");
+        error.put(ERROR, "Resource not found.");
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
@@ -178,7 +180,22 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleDuplicatedQuestionException(DuplicatedQuestionException ex) {
         Map<String, String> errors = new HashMap<>();
         String message = ex.getMessage();
-        errors.put("error", message);
+        errors.put(ERROR, message);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles HttpNoMatchEventIdException by returning a ResponseEntity with a map of field errors and HttpStatus.BAD_REQUEST.
+     * HttpNoMatchEventIdException will be thrown when @RequestBody when update a quiz with a different event's id from json.
+     *
+     * @return a ResponseEntity with an error message and HttpStatus.BAD_REQUEST
+     */
+    @ExceptionHandler(value = {NoMatchEventIdException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleNoMatchEventIdException(NoMatchEventIdException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put(ERROR, message);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 }

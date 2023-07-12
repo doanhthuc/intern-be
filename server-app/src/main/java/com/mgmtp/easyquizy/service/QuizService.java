@@ -5,6 +5,7 @@ import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
 import com.mgmtp.easyquizy.dto.QuizDTO;
 import com.mgmtp.easyquizy.dto.QuizDtoDetail;
 import com.mgmtp.easyquizy.exception.DuplicatedQuestionException;
+import com.mgmtp.easyquizy.exception.NoMatchEventIdException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import org.springframework.data.domain.Page;
 
@@ -18,7 +19,7 @@ public interface QuizService {
 
     QuizDtoDetail getQuizById(Long id) throws RecordNotFoundException;
 
-    QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException;
+    QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException, NoMatchEventIdException;
 
     void deleteQuizById(Long id) throws RecordNotFoundException;
 
