@@ -5,8 +5,9 @@ import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.EventMapper;
 import com.mgmtp.easyquizy.model.event.EventEntity;
 import com.mgmtp.easyquizy.repository.EventRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +22,16 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
-    private final EventRepository eventRepository;
+    @Autowired
+    private EventRepository eventRepository;
 
-    private final EventMapper eventMapper;
+    @Autowired
+    private EventMapper eventMapper;
+
+    @Lazy
+    @Autowired
+    QuizService quizService;
 
     @Override
     public EventDTO createEvent(EventDTO eventDTO) {
@@ -68,9 +74,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void deleteEventById(Long id) throws RecordNotFoundException {
-        if (!eventRepository.existsById(id)) {
-            throw new RecordNotFoundException("No event records exist for the given id");
+        EventEntity eventEntity = eventRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
+        if(!eventEntity.getQuizEntity().isEmpty()) {
+            eventEntity.getQuizEntity().forEach(quizEntity -> quizService.deleteQuizById(quizEntity.getId()));
         }
-        eventRepository.deleteById(id);
+        eventRepository.deleteById(eventEntity.getId());
     }
 }
