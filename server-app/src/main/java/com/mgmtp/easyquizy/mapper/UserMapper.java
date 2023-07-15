@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.mapper;
 
-import com.mgmtp.easyquizy.dto.UserDTO;
+import com.mgmtp.easyquizy.dto.user.UserDTO;
 import com.mgmtp.easyquizy.model.role.RoleEntity;
 import com.mgmtp.easyquizy.model.role.RoleName;
 import com.mgmtp.easyquizy.model.user.UserEntity;

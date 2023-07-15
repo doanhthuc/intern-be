@@ -35,6 +35,7 @@ dependencies {
     implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.devtools
     implementation libs.swagger.models
+    implementation libs.spring.boot.starter.webflux
     annotationProcessor libs.spring.boot.configuration.processor
 
     //jjwt

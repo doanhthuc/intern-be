@@ -1,9 +1,9 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.GenerateQuizRequestDTO;
-import com.mgmtp.easyquizy.dto.QuestionListViewDTO;
-import com.mgmtp.easyquizy.dto.QuizDTO;
-import com.mgmtp.easyquizy.dto.QuizDtoDetail;
+import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
+import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
+import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
+import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
 import com.mgmtp.easyquizy.exception.DuplicatedQuestionException;
 import com.mgmtp.easyquizy.exception.NoMatchEventIdException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;

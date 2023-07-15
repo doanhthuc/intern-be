@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.validator;
 
-import com.mgmtp.easyquizy.dto.GenerateQuizRequestDTO;
+import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;

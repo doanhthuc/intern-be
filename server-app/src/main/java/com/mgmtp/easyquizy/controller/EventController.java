@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.EventDTO;
+import com.mgmtp.easyquizy.dto.event.EventDTO;
 import com.mgmtp.easyquizy.service.EventServiceImpl;
 import com.mgmtp.easyquizy.validator.DateRangeValidator;
 import io.swagger.v3.oas.annotations.Operation;

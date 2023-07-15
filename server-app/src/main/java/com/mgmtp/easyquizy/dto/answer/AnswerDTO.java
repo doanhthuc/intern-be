@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.answer;
 
 import lombok.*;
 

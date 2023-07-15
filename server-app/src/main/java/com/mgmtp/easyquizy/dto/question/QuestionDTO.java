@@ -1,5 +1,8 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.question;
 
+import com.mgmtp.easyquizy.dto.answer.AnswerDTO;
+import com.mgmtp.easyquizy.dto.attachment.AttachmentDTO;
+import com.mgmtp.easyquizy.dto.category.CategoryDTO;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import lombok.*;
 

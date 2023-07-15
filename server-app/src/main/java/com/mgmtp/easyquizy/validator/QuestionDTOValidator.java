@@ -1,7 +1,7 @@
 package com.mgmtp.easyquizy.validator;
 
-import com.mgmtp.easyquizy.dto.AnswerDTO;
-import com.mgmtp.easyquizy.dto.QuestionDTO;
+import com.mgmtp.easyquizy.dto.answer.AnswerDTO;
+import com.mgmtp.easyquizy.dto.question.QuestionDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;

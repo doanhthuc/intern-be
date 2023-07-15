@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.CategoryInfoDTO;
+import com.mgmtp.easyquizy.dto.category.CategoryInfoDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.CategoryMapper;

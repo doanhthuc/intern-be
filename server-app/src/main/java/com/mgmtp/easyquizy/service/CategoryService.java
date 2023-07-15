@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.CategoryInfoDTO;
+import com.mgmtp.easyquizy.dto.category.CategoryInfoDTO;
 import com.mgmtp.easyquizy.model.category.CategoryEntity;
 
 import java.util.List;

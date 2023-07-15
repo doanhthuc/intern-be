@@ -1,6 +1,10 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.*;
+import com.mgmtp.easyquizy.dto.event.EventDTO;
+import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
+import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
+import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
+import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
 import com.mgmtp.easyquizy.service.QuizServiceImpl;
 import com.mgmtp.easyquizy.validator.GenerateQuizRequestDTOValidator;
 import io.swagger.v3.oas.annotations.Operation;

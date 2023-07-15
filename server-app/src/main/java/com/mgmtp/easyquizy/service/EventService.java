@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.EventDTO;
+import com.mgmtp.easyquizy.dto.event.EventDTO;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import org.springframework.data.domain.Page;
 

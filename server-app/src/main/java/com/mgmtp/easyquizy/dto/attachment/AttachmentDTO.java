@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.attachment;
 
 import com.mgmtp.easyquizy.model.attachment.AttachmentType;
 import lombok.*;

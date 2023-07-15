@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.UserDTO;
+import com.mgmtp.easyquizy.dto.user.UserDTO;
 import com.mgmtp.easyquizy.mapper.UserMapper;
 import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.user.UserEntity;

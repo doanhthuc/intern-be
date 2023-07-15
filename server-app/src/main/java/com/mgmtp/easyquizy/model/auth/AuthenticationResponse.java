@@ -1,7 +1,7 @@
 package com.mgmtp.easyquizy.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mgmtp.easyquizy.dto.UserDTO;
+import com.mgmtp.easyquizy.dto.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

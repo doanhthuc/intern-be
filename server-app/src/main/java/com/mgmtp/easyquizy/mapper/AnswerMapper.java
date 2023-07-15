@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.mapper;
 
-import com.mgmtp.easyquizy.dto.AnswerDTO;
+import com.mgmtp.easyquizy.dto.answer.AnswerDTO;
 import com.mgmtp.easyquizy.model.answer.AnswerEntity;
 import org.mapstruct.Mapper;
 

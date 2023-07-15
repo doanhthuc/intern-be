@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.role;
 
 import com.mgmtp.easyquizy.model.role.RoleName;
 import lombok.*;

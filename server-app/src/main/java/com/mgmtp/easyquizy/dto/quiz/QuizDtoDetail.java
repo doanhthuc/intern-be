@@ -1,5 +1,7 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.quiz;
 
+import com.mgmtp.easyquizy.dto.event.EventDTO;
+import com.mgmtp.easyquizy.dto.question.QuestionDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

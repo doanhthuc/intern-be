@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.dto;
+package com.mgmtp.easyquizy.dto.question;
 
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import lombok.AllArgsConstructor;
