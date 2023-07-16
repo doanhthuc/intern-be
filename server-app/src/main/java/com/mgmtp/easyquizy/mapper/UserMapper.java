@@ -13,8 +13,11 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     @Mapping(source = "roles", target = "roles", qualifiedByName = "roleEntityToStringList")
     UserDTO entityToUserDTO(UserEntity userEntity);
+
+    UserEntity userDtoToUserEntity(UserDTO userDTO);
 
     @Named("roleEntityToStringList")
     default List<RoleName> roleEntityToStringList(List<RoleEntity> roles) {
@@ -22,4 +25,5 @@ public interface UserMapper {
                 .map(RoleEntity::getRoleName)
                 .collect(Collectors.toList());
     }
+
 }

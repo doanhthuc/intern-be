@@ -69,7 +69,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .antMatchers(
-                        "/api/auth/**",
+                        "/api/auth/authenticate",
                         "/api/h2-console/**",
                         "/api/v2/api-docs",
                         "/api/swagger-resources",
@@ -88,7 +88,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/questions/**").hasAnyAuthority(RoleName.QUESTION_MAKER.toString(), RoleName.ADMIN.toString())
                 .antMatchers("/api/quizzes/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .antMatchers("/api/events/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
-                .antMatchers("/api/users/me").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
+                .antMatchers("/api/users/me/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
+                .antMatchers("/api/users/**").hasAnyAuthority(RoleName.ADMIN.toString())
+                .antMatchers("/api/auth/register").hasAnyAuthority(RoleName.ADMIN.toString())
                 .antMatchers("/api/kahoot/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
                 .anyRequest().authenticated()
                 .and()
