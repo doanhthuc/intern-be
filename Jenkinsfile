@@ -8,7 +8,7 @@ pipeline {
     }
     environment {
         GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
-    }
+        }
     stages {
         stage('Checkout') {
             steps {
@@ -31,6 +31,19 @@ pipeline {
                             sh "gradle sonar"
                         }
                     }
+                }
+            }
+        }
+        stage("Deploy") {
+            when {
+                anyOf {
+                    branch "develop"
+                }
+            }
+            steps {
+                sshagent(['da-nang-intership-ci-ssh']) {
+                    sh 'scp -o StrictHostKeyChecking=no server-app/build/libs/server-app-0.0.1-SNAPSHOT.jar easyquizy@easy-quizy.mgm-edv.de:/home/easyquizy/app/'
+                    sh 'ssh -o StrictHostKeyChecking=no easyquizy@easy-quizy.mgm-edv.de ./app/run_server.sh'
                 }
             }
         }
