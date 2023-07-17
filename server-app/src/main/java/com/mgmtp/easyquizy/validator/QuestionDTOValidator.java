@@ -1,6 +1,5 @@
 package com.mgmtp.easyquizy.validator;
 
-import com.mgmtp.easyquizy.dto.answer.AnswerDTO;
 import com.mgmtp.easyquizy.dto.question.QuestionDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -23,8 +22,9 @@ public class QuestionDTOValidator implements Validator {
         }
 
         long count = questionDTOs.getAnswers().stream()
-                .filter(AnswerDTO::getIsCorrect)
+                .filter(answer -> answer.getIsCorrect() != null && answer.getIsCorrect())
                 .count();
+
         if (count > 1) {
             errors.rejectValue("answers", "isCorrect.invalid", "Please select exactly one correct answer!!!");
         }
