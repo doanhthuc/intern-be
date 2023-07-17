@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
+import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserRequestDto;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserResponseDto;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
@@ -15,12 +16,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class KahootServiceImpl implements KahootService {
     private static final String LOG_IN_URL = "https://create.kahoot.it/rest/authenticate";
+
+    private static final String FOLDER_URL_TEMPLATE = "https://create.kahoot.it/rest/folders/%s";
 
     private final KahootAccountRepository kahootAccountRepository;
 
@@ -76,7 +80,52 @@ public class KahootServiceImpl implements KahootService {
             userStatusResponseDto.setIsConnected(true);
             return userStatusResponseDto;
         } catch (HttpStatusCodeException ex) {
-            throw InvalidFieldsException.fromFieldError("Message","Username or password error");
+            throw InvalidFieldsException.fromFieldError("Message", "Username or password error");
+        }
+    }
+
+    @Override
+    public KahootFolderDTO getOrCreateFolder(String folderName) {
+        KahootAccountEntity kahootAccount = getKahootAccount();
+        if (kahootAccount == null) {
+            throw new IllegalStateException("No valid Kahoot account found!");
+        }
+
+        String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
+
+        RestClient restClient = new RestClient()
+                .defaultHeader()
+                .setBearerToken(kahootAccount.getAccessToken());
+
+        KahootFolderDTO kahootFolderDTO;
+        try {
+            kahootFolderDTO = restClient.setUrl(rootFolderUrl)
+                    .setMethod(HttpMethod.GET)
+                    .call(KahootFolderDTO.class)
+                    .getBody();
+        } catch (HttpStatusCodeException e) {
+            throw new IllegalStateException("Failed to retrieve Kahoot folder information!");
+        }
+
+        Optional<KahootFolderDTO> existingFolder = Optional.ofNullable(kahootFolderDTO)
+                .orElseThrow(() -> new IllegalStateException("No valid Kahoot folder found!"))
+                .getFolders().stream()
+                .filter(f -> f.getName().equals(folderName))
+                .findFirst();
+
+        if (existingFolder.isPresent()) {
+            return existingFolder.get();
+        } else {
+            try {
+                return
+                        restClient.setUrl(rootFolderUrl + "/folders")
+                                .setMethod(HttpMethod.POST)
+                                .setRequestBody(Collections.singletonMap("name", folderName))
+                                .call(KahootFolderDTO.class)
+                                .getBody();
+            } catch (HttpStatusCodeException e) {
+                throw new IllegalStateException("Failed to create new Kahoot folder!");
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
+import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
@@ -12,9 +13,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 @Tag(name = "Kahoot")
 @RequiredArgsConstructor
@@ -51,5 +54,20 @@ public class KahootController {
             return kahootUserStatusResponseDto;
         }
         return KahootUserStatusResponseDto.getDisconnectDto();
+    }
+
+    @Operation(summary = "Create a new folder on Kahoot")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Create folder success",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "401", description = "Authentication fail"),
+            @ApiResponse(responseCode = "400", description = "Invalid folder name")
+    })
+
+    @PostMapping("/folders")
+    public ResponseEntity<KahootFolderDTO> createFolder(@RequestBody Map<String, String> requestBody) {
+        String folderName = requestBody.get("name");
+        KahootFolderDTO folder = kahootService.getOrCreateFolder(folderName);
+        return ResponseEntity.ok(folder);
     }
 }
