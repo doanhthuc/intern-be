@@ -4,12 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.passay.*;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.Arrays;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -19,6 +16,7 @@ public class ChangePasswordRequest {
     @NotEmpty(message = "This is a required field")
     private String currentPassword;
 
+    @NotNull
     private String newPassword;
 
 }

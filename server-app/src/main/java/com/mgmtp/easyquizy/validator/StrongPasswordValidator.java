@@ -1,6 +1,7 @@
 package com.mgmtp.easyquizy.validator;
 
 import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
+import io.micrometer.core.instrument.util.StringUtils;
 import org.passay.*;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -18,8 +19,8 @@ public class StrongPasswordValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         ChangePasswordRequest request = (ChangePasswordRequest) target;
-        if (((ChangePasswordRequest) target).getNewPassword().isEmpty()){
-            errors.rejectValue("newPassword", "password.empty","This is a required field");
+        if (StringUtils.isEmpty(((ChangePasswordRequest) target).getNewPassword())) {
+            errors.rejectValue("newPassword", "password.empty", "This is a required field");
             return;
         }
         PasswordValidator validator = new PasswordValidator(Arrays.asList(
