@@ -198,5 +198,20 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         errors.put(ERROR, message);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Handles QuestionAssociatedWithQuizzesException by returning a ResponseEntity with an error message and HttpStatus.BAD_REQUEST.
+     * QuestionAssociatedWithQuizzesException is thrown when an attempt is made to delete a question that is associated with quizzes.
+     *
+     * @return a ResponseEntity with an error message and HttpStatus.BAD_REQUEST
+     */
+    @ExceptionHandler(value = {QuestionAssociatedWithQuizzesException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleQuestionAssociatedWithQuizzesException(QuestionAssociatedWithQuizzesException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put(ERROR, message);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 }
 

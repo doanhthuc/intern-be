@@ -4,6 +4,7 @@ import com.mgmtp.easyquizy.dto.answer.AnswerDTO;
 import com.mgmtp.easyquizy.dto.question.QuestionDTO;
 import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
+import com.mgmtp.easyquizy.exception.QuestionAssociatedWithQuizzesException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.AnswerMapper;
 import com.mgmtp.easyquizy.mapper.QuestionMapper;
@@ -113,12 +114,13 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void deleteQuestionById(Long id) throws RecordNotFoundException {
-        if (questionRepository.existsById(id)) {
-            questionRepository.deleteById(id);
-        } else {
-            throw new RecordNotFoundException("No Question record exists for the given id: " + id);
+    public void deleteQuestionById(Long id) {
+        QuestionEntity question = questionRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("No Question record exists for the given id: " + id));
+        if (!question.getQuizzes().isEmpty()) {
+            throw new QuestionAssociatedWithQuizzesException("Cannot delete question with id " + id + " because it is associated with quizzes.");
         }
+        questionRepository.deleteById(id);
     }
 
     @Override
