@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
+import com.mgmtp.easyquizy.dto.kahoot.KahootExportQuizResponseDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;
@@ -14,6 +15,7 @@ public interface KahootService {
 
     KahootFolderDTO createFolder(String folderName);
 
-    KahootFolderDTO getFolder(String folderName);
+    KahootFolderDTO getOrCreateFolder(String folderName);
 
+    KahootExportQuizResponseDTO exportQuiz(long id);
 }

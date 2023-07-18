@@ -1,6 +1,7 @@
 package com.mgmtp.easyquizy.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.mgmtp.easyquizy.exception.kahoot.KahootUnauthorizedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -227,6 +228,16 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         String message = ex.getMessage();
         errors.put(ERROR, message);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(value = {KahootUnauthorizedException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleKahootUnauthorizedException(KahootUnauthorizedException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put(ERROR, message);
+        return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
     }
 }
 
