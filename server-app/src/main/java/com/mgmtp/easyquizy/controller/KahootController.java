@@ -2,7 +2,6 @@ package com.mgmtp.easyquizy.controller;
 
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
-import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
@@ -37,7 +36,7 @@ public class KahootController {
     })
     @PostMapping("/auth")
     public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody AuthenticationRequest authenticationRequest)
-            throws InvalidFieldsException {
+            throws IllegalStateException {
         return kahootService.authenticate(authenticationRequest);
     }
 
@@ -56,6 +55,17 @@ public class KahootController {
         return KahootUserStatusResponseDto.getDisconnectDto();
     }
 
+    @Operation(summary = "Log out Kahoot account")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Log out successfully",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "401", description = "Authentication fail")
+    })
+    @PostMapping("/logout")
+    public KahootUserStatusResponseDto logOutKahootAccount() {
+        return kahootService.logout();
+    }
+
     @Operation(summary = "Create a new folder on Kahoot")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Create folder success",
@@ -63,11 +73,10 @@ public class KahootController {
             @ApiResponse(responseCode = "401", description = "Authentication fail"),
             @ApiResponse(responseCode = "400", description = "Invalid folder name")
     })
-
     @PostMapping("/folders")
-    public ResponseEntity<KahootFolderDTO> createFolder(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<KahootFolderDTO> createFolder(@RequestBody Map<String, String> requestBody) throws IllegalStateException {
         String folderName = requestBody.get("name");
-        KahootFolderDTO folder = kahootService.getOrCreateFolder(folderName);
+        KahootFolderDTO folder = kahootService.getFolder(folderName);
         return ResponseEntity.ok(folder);
     }
 }

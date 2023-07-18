@@ -64,6 +64,7 @@ dependencies {
     implementation libs.mapstruct
     annotationProcessor libs.mapstruct.processor
     implementation libs.flyway.core
+    implementation libs.okhttp
 
     // passay
     implementation libs.passay

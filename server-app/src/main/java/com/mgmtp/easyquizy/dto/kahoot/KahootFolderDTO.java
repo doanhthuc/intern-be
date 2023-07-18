@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.dto.kahoot;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class KahootFolderDTO {
     @JsonProperty("id")
     private String id;

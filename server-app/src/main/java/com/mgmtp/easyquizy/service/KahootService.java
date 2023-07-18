@@ -10,5 +10,10 @@ public interface KahootService {
 
     KahootUserStatusResponseDto authenticate(AuthenticationRequest authenticationRequest);
 
-    KahootFolderDTO getOrCreateFolder(String folderName);
+    KahootUserStatusResponseDto logout();
+
+    KahootFolderDTO createFolder(String folderName);
+
+    KahootFolderDTO getFolder(String folderName);
+
 }

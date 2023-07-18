@@ -4,17 +4,15 @@ import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserRequestDto;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserResponseDto;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
-import com.mgmtp.easyquizy.exception.InvalidFieldsException;
+import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 import com.mgmtp.easyquizy.repository.KahootAccountRepository;
 import com.mgmtp.easyquizy.utils.RestClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -23,7 +21,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class KahootServiceImpl implements KahootService {
     private static final String LOG_IN_URL = "https://create.kahoot.it/rest/authenticate";
-
     private static final String FOLDER_URL_TEMPLATE = "https://create.kahoot.it/rest/folders/%s";
 
     private final KahootAccountRepository kahootAccountRepository;
@@ -43,13 +40,13 @@ public class KahootServiceImpl implements KahootService {
         }
         try {
             new RestClient()
-                    .defaultHeader()
                     .setBearerToken(kahootAccountEntity.getAccessToken())
+                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
                     .setUrl(LOG_IN_URL)
-                    .setMethod(HttpMethod.GET)
+                    .setMethod("GET")
                     .call(KahootUserResponseDto.class);
-        } catch (HttpStatusCodeException ex) {
-            if (ex.getRawStatusCode() == 401) {
+        } catch (HttpErrorStatusException e) {
+            if (e.getStatusCode() == 401) {
                 kahootAccountRepository.deleteById(kahootAccountEntity.getUuid());
                 return null;
             }
@@ -59,73 +56,84 @@ public class KahootServiceImpl implements KahootService {
 
     @Override
     public KahootUserStatusResponseDto authenticate(AuthenticationRequest authenticationRequest) {
+        KahootUserRequestDto kahootUserRequestDto = KahootUserRequestDto.builder()
+                .username(authenticationRequest.getUsername())
+                .password(authenticationRequest.getPassword())
+                .grant_type("password")
+                .build();
+        KahootUserResponseDto responseBody = null;
         try {
-            KahootUserRequestDto kahootUserRequestDto = KahootUserRequestDto.builder()
-                    .username(authenticationRequest.getUsername())
-                    .password(authenticationRequest.getPassword())
-                    .grant_type("password")
-                    .build();
-            ResponseEntity<KahootUserResponseDto> responseEntity = new RestClient()
-                    .defaultHeader()
-                    .setRequestBody(kahootUserRequestDto)
+            responseBody = new RestClient()
+                    .setJsonRequestBody(kahootUserRequestDto)
+                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
                     .setUrl(LOG_IN_URL)
-                    .setMethod(HttpMethod.POST)
+                    .setMethod("POST")
                     .call(KahootUserResponseDto.class);
-            KahootUserResponseDto responseBody = responseEntity.getBody();
-            KahootAccountEntity kahootAccountEntity =
-                    kahootAccountRepository.save(kahootAccountMapper.userResponseDtoToAccountEntity(responseBody));
-
-            KahootUserStatusResponseDto userStatusResponseDto =
-                    kahootAccountMapper.kahootAccountEntityToUserStatusDto(kahootAccountEntity);
-            userStatusResponseDto.setIsConnected(true);
-            return userStatusResponseDto;
-        } catch (HttpStatusCodeException ex) {
-            throw InvalidFieldsException.fromFieldError("Message", "Username or password error");
+        } catch (HttpErrorStatusException e) {
+            if (e.getStatusCode() == 401) {
+                throw new IllegalStateException("Username or password error!");
+            }
         }
+        KahootAccountEntity kahootAccountEntity =
+                kahootAccountRepository.save(kahootAccountMapper.userResponseDtoToAccountEntity(responseBody));
+        KahootUserStatusResponseDto userStatusResponseDto =
+                kahootAccountMapper.kahootAccountEntityToUserStatusDto(kahootAccountEntity);
+        userStatusResponseDto.setIsConnected(true);
+        return userStatusResponseDto;
     }
 
     @Override
-    public KahootFolderDTO getOrCreateFolder(String folderName) {
+    public KahootUserStatusResponseDto logout() {
+        KahootAccountEntity kahootAccount = getKahootAccount();
+        if (kahootAccount != null) {
+            kahootAccountRepository.deleteById(kahootAccount.getUuid());
+        }
+        return KahootUserStatusResponseDto.getDisconnectDto();
+    }
+
+    @Override
+    public KahootFolderDTO createFolder(String folderName) {
         KahootAccountEntity kahootAccount = getKahootAccount();
         if (kahootAccount == null) {
             throw new IllegalStateException("No valid Kahoot account found!");
         }
-
         String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
-
-        RestClient restClient = new RestClient()
-                .defaultHeader()
-                .setBearerToken(kahootAccount.getAccessToken());
-
-        KahootFolderDTO kahootFolderDTO;
         try {
-            kahootFolderDTO = restClient.setUrl(rootFolderUrl)
-                    .setMethod(HttpMethod.GET)
-                    .call(KahootFolderDTO.class)
-                    .getBody();
-        } catch (HttpStatusCodeException e) {
+            return new RestClient()
+                    .setBearerToken(kahootAccount.getAccessToken())
+                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
+                    .setUrl(rootFolderUrl + "/folders")
+                    .setMethod("POST")
+                    .setJsonRequestBody(Collections.singletonMap("name", folderName))
+                    .call(KahootFolderDTO.class);
+        } catch (HttpErrorStatusException ex) {
+            throw new IllegalStateException("Failed to create new Kahoot folder!");
+        }
+    }
+
+    @Override
+    public KahootFolderDTO getFolder(String folderName) {
+        KahootAccountEntity kahootAccount = getKahootAccount();
+        if (kahootAccount == null) {
+            throw new IllegalStateException("No valid Kahoot account found!");
+        }
+        String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
+        KahootFolderDTO kahootFolderDTO = null;
+        try {
+            kahootFolderDTO = new RestClient()
+                    .setBearerToken(kahootAccount.getAccessToken())
+                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
+                    .setUrl(rootFolderUrl)
+                    .setMethod("GET")
+                    .call(KahootFolderDTO.class);
+        } catch (HttpErrorStatusException e) {
             throw new IllegalStateException("Failed to retrieve Kahoot folder information!");
         }
-
         Optional<KahootFolderDTO> existingFolder = Optional.ofNullable(kahootFolderDTO)
                 .orElseThrow(() -> new IllegalStateException("No valid Kahoot folder found!"))
                 .getFolders().stream()
-                .filter(f -> f.getName().equals(folderName))
+                .filter(folder -> folder.getName().equals(folderName))
                 .findFirst();
-
-        if (existingFolder.isPresent()) {
-            return existingFolder.get();
-        } else {
-            try {
-                return
-                        restClient.setUrl(rootFolderUrl + "/folders")
-                                .setMethod(HttpMethod.POST)
-                                .setRequestBody(Collections.singletonMap("name", folderName))
-                                .call(KahootFolderDTO.class)
-                                .getBody();
-            } catch (HttpStatusCodeException e) {
-                throw new IllegalStateException("Failed to create new Kahoot folder!");
-            }
-        }
+        return existingFolder.orElseGet(() -> createFolder(folderName));
     }
 }

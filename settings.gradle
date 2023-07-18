@@ -48,6 +48,7 @@ dependencyResolutionManagement {
             library('swagger-models','io.swagger.core.v3','swagger-models').withoutVersion()
             library('flyway-core','org.flywaydb','flyway-core').versionRef('flyway')
             library('passay','org.passay','passay').version('1.6.0')
+            library('okhttp', 'com.squareup.okhttp3', 'okhttp').withoutVersion()
             include 'springdoc-openapi-ui'
         }
 
