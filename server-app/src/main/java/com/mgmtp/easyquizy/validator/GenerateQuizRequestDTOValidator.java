@@ -6,7 +6,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class GenerateQuizRequestDTOValidator  implements Validator {
+public class GenerateQuizRequestDTOValidator implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
         return GenerateQuizRequestDTO.class.isAssignableFrom(clazz);
@@ -16,7 +16,7 @@ public class GenerateQuizRequestDTOValidator  implements Validator {
     public void validate(Object target, Errors errors) {
         GenerateQuizRequestDTO generateQuizRequestDTO = (GenerateQuizRequestDTO) target;
 
-        if (generateQuizRequestDTO.getCategoryPercentages().values().stream().mapToDouble(Double::doubleValue).sum() != 1.0) {
+        if (generateQuizRequestDTO.getCategoryPercentages().values().stream().mapToDouble(value -> value * 100).sum() / 100 != 1.0) {
             errors.rejectValue("categoryPercentages", "categoryPercentages.sum", "The sum of category percentages must be equal to 1!");
         }
     }
