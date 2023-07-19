@@ -11,6 +11,7 @@ import java.util.List;
 @Component
 public class QuestionDTOValidator implements Validator {
     private static final List<Integer> VALID_TIME_LIMIT = Arrays.asList(10, 20, 30, 60, 90, 120, 180, 240);
+
     @Override
     public boolean supports(Class<?> clazz) {
         return QuestionDTO.class.isAssignableFrom(clazz);
@@ -29,11 +30,11 @@ public class QuestionDTOValidator implements Validator {
             return;
         }
 
-        long count = questionDTOs.getAnswers().stream()
+        long correctAnswerCount = questionDTOs.getAnswers().stream()
                 .filter(answer -> answer.getIsCorrect() != null && answer.getIsCorrect())
                 .count();
 
-        if (count > 1) {
+        if (correctAnswerCount != 1) {
             errors.rejectValue("answers", "isCorrect.invalid", "Please select exactly one correct answer!!!");
         }
     }
