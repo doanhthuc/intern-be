@@ -1,7 +1,6 @@
 package com.mgmtp.easyquizy.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mgmtp.easyquizy.dto.auth.AuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
@@ -72,7 +71,7 @@ public class KahootServiceImpl implements KahootService {
     }
 
     @Override
-    public KahootUserStatusResponseDto authenticate(AuthenticationRequestDTO authenticationRequest) {
+    public KahootUserStatusResponseDto authenticate(KahootAuthenticationRequestDTO authenticationRequest) {
         KahootUserRequestDto kahootUserRequestDto = KahootUserRequestDto.builder()
                 .username(authenticationRequest.getUsername())
                 .password(authenticationRequest.getPassword())

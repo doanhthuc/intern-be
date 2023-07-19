@@ -91,7 +91,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/users/me/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
                 .antMatchers("/api/users/**").hasAnyAuthority(RoleName.ADMIN.toString())
                 .antMatchers("/api/auth/register").hasAnyAuthority(RoleName.ADMIN.toString())
-                .antMatchers("/api/kahoot/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString(), RoleName.QUESTION_MAKER.toString())
+                .antMatchers("/api/kahoot/**").hasAnyAuthority(RoleName.ORGANIZER.toString(), RoleName.ADMIN.toString())
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

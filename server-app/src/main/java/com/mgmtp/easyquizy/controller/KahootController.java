@@ -1,6 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.auth.AuthenticationRequestDTO;
+import com.mgmtp.easyquizy.dto.kahoot.KahootAuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootExportQuizResponseDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
@@ -30,7 +30,7 @@ public class KahootController {
 
     private final KahootAccountMapper kahootAccountMapper;
 
-    @Operation(summary = "Authenticate user to get Kahoot access token")
+    @Operation(summary = "Authenticate user to get Kahoot access token", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connect Kahoot Success",
                     content = {@Content(mediaType = "application/json")}),
@@ -38,12 +38,12 @@ public class KahootController {
             @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
     @PostMapping("/auth")
-    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest)
+    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody KahootAuthenticationRequestDTO kahootAuthenticationRequestDTO)
             throws IllegalStateException {
-        return kahootService.authenticate(authenticationRequest);
+        return kahootService.authenticate(kahootAuthenticationRequestDTO);
     }
 
-    @Operation(summary = "Get status Kahoot account")
+    @Operation(summary = "Get status Kahoot account", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponse(responseCode = "200", description = "Connect Kahoot Success or Fail",
             content = {@Content(mediaType = "application/json")})
     @GetMapping("/status")
@@ -58,7 +58,7 @@ public class KahootController {
         return KahootUserStatusResponseDto.getDisconnectDto();
     }
 
-    @Operation(summary = "Log out Kahoot account")
+    @Operation(summary = "Log out Kahoot account", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Log out successfully",
                     content = {@Content(mediaType = "application/json")}),
@@ -81,7 +81,7 @@ public class KahootController {
         return kahootService.exportQuiz(id);
     }
 
-    @Operation(summary = "Create a new folder on Kahoot")
+    @Operation(summary = "Create a new folder on Kahoot", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Create folder success",
                     content = {@Content(mediaType = "application/json")}),
