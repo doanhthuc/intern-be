@@ -27,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.Predicate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -117,7 +118,7 @@ public class QuestionServiceImpl implements QuestionService {
         QuestionEntity question = questionRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("No Question record exists for the given id: " + id));
         if (!question.getQuizzes().isEmpty()) {
-            throw new QuestionAssociatedWithQuizzesException("Cannot delete question with id " + id + " because it is associated with quizzes.");
+            throw new QuestionAssociatedWithQuizzesException("Cannot delete this question because it is associated with quizzes!");
         }
         questionRepository.deleteById(id);
     }

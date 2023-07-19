@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
 import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -19,10 +21,14 @@ public class AttachmentEntity {
 
     @Lob
     @Type(type = "text")
-    private String content;
+    @NotNull
+    private String imageData;
 
-    @Enumerated(EnumType.STRING)
-    private AttachmentType attachmentType;
+    @Column(columnDefinition = "TEXT")
+    private String sourceCode;
+
+    @Column
+    private String kahootUrl;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachment")
     @JsonIgnore
