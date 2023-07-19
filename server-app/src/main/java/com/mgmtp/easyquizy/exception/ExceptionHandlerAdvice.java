@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -230,7 +231,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(value = {KahootUnauthorizedException.class})
     @ResponseBody
     public ResponseEntity<Object> handleKahootUnauthorizedException(KahootUnauthorizedException ex) {
@@ -238,6 +238,21 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         String message = ex.getMessage();
         errors.put(ERROR, message);
         return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles ResponseStatusException by returning a ResponseEntity with an error message and the corresponding HttpStatus.
+     * ResponseStatusException is thrown when an invalid request is made, such as providing invalid credentials.
+     *
+     * @return a ResponseEntity with an error message and the corresponding HttpStatus
+     */
+    @ExceptionHandler(value = {ResponseStatusException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put(ERROR, message);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 }
 

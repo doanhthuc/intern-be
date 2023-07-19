@@ -1,10 +1,10 @@
 package com.mgmtp.easyquizy.controller;
 
+import com.mgmtp.easyquizy.dto.auth.AuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootExportQuizResponseDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
-import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 import com.mgmtp.easyquizy.service.KahootService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +38,7 @@ public class KahootController {
             @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
     @PostMapping("/auth")
-    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody AuthenticationRequest authenticationRequest)
+    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest)
             throws IllegalStateException {
         return kahootService.authenticate(authenticationRequest);
     }

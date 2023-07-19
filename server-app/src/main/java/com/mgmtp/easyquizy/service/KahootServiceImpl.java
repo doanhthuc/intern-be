@@ -1,6 +1,7 @@
 package com.mgmtp.easyquizy.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mgmtp.easyquizy.dto.auth.AuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
@@ -9,7 +10,6 @@ import com.mgmtp.easyquizy.exception.kahoot.KahootPublishDraftException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootUnauthorizedException;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
-import com.mgmtp.easyquizy.model.auth.AuthenticationRequest;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.repository.KahootAccountRepository;
@@ -72,7 +72,7 @@ public class KahootServiceImpl implements KahootService {
     }
 
     @Override
-    public KahootUserStatusResponseDto authenticate(AuthenticationRequest authenticationRequest) {
+    public KahootUserStatusResponseDto authenticate(AuthenticationRequestDTO authenticationRequest) {
         KahootUserRequestDto kahootUserRequestDto = KahootUserRequestDto.builder()
                 .username(authenticationRequest.getUsername())
                 .password(authenticationRequest.getPassword())

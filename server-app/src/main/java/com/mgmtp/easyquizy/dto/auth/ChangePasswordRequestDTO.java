@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.model.auth;
+package com.mgmtp.easyquizy.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,11 +12,10 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChangePasswordRequest {
+public class ChangePasswordRequestDTO {
     @NotEmpty(message = "This is a required field")
     private String currentPassword;
 
     @NotNull
     private String newPassword;
-
 }

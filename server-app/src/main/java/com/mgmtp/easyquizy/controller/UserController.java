@@ -1,10 +1,10 @@
 package com.mgmtp.easyquizy.controller;
 
+import com.mgmtp.easyquizy.dto.auth.ChangePasswordRequestDTO;
 import com.mgmtp.easyquizy.dto.user.UserDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.UserMapper;
-import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.service.UserServiceImpl;
 import com.mgmtp.easyquizy.validator.StrongPasswordValidator;
@@ -153,7 +153,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Authorization fail")
     })
     @PutMapping("/me/password")
-    public ResponseEntity<UserDTO> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<UserDTO> changePassword(@Valid @RequestBody ChangePasswordRequestDTO request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();

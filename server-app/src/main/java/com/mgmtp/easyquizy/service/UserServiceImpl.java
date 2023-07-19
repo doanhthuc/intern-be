@@ -1,10 +1,10 @@
 package com.mgmtp.easyquizy.service;
 
+import com.mgmtp.easyquizy.dto.auth.ChangePasswordRequestDTO;
 import com.mgmtp.easyquizy.dto.user.UserDTO;
 import com.mgmtp.easyquizy.exception.InvalidFieldsException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.mapper.UserMapper;
-import com.mgmtp.easyquizy.model.auth.ChangePasswordRequest;
 import com.mgmtp.easyquizy.model.role.RoleEntity;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.repository.RoleRepository;
@@ -69,13 +69,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void changePassword(UserEntity user,ChangePasswordRequest request) throws InvalidFieldsException {
+    public void changePassword(UserEntity user, ChangePasswordRequestDTO request) throws InvalidFieldsException {
         String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw InvalidFieldsException.fromFieldError("currentPassword","Current password is incorrect.");
+            throw InvalidFieldsException.fromFieldError("currentPassword", "Current password is incorrect.");
         }
         if (request.getNewPassword().equals(request.getCurrentPassword())) {
-            throw InvalidFieldsException.fromFieldError("newPassword","New password must be different from current password");
+            throw InvalidFieldsException.fromFieldError("newPassword", "New password must be different from current password");
         }
         user.setPassword(encodedNewPassword);
         userRepository.save(user);
@@ -124,7 +124,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         Page<UserEntity> page = userRepository.findAll(filterSpec, pageable);
         return page.map(userMapper::entityToUserDTO);
     }
-
 
     @Override
     public UserDTO updateUser(UserDTO userDTO) {

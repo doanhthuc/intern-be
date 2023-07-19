@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,36 +30,40 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryEntity createCategory(CategoryInfoDTO categoryInfoDTO) {
         try {
+            categoryInfoDTO.setId(null);
             return categoryRepository.save(categoryMapper.categoryInfoDtoToCategoryEntity(categoryInfoDTO));
-        } catch (DataIntegrityViolationException e){
-            throw InvalidFieldsException.fromFieldError("categoryName", "Category is existed");
+        } catch (DataIntegrityViolationException e) {
+            throw InvalidFieldsException.fromFieldError("categoryName", "Category exists!");
         }
     }
 
     @Override
+    @Transactional
     public CategoryEntity updateCategory(CategoryInfoDTO categoryInfoDTO) {
         try {
             if (categoryInfoDTO.getId() == null) {
                 throw InvalidFieldsException.fromFieldError("categoryId", "ID is required");
             }
             if (!categoryRepository.existsById(categoryInfoDTO.getId())) {
-                throw new RecordNotFoundException("Not found category");
+                throw new RecordNotFoundException("Category not found");
             }
             return categoryRepository.save(categoryMapper.categoryInfoDtoToCategoryEntity(categoryInfoDTO));
-        } catch (DataIntegrityViolationException e){
-            throw InvalidFieldsException.fromFieldError("categoryName", "Category name is existed");
+        } catch (DataIntegrityViolationException e) {
+            throw InvalidFieldsException.fromFieldError("categoryName", "Category name exists");
         }
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new RecordNotFoundException("Not found category");
+            throw new RecordNotFoundException("Category not found");
         }
         if (questionRepository.existsByCategoryId(id)) {
-            throw InvalidFieldsException.fromFieldError("categoryId", "Exist question by this category");
+            throw InvalidFieldsException.fromFieldError("categoryId", "A question exists in this category");
         }
         categoryRepository.deleteById(id);
     }

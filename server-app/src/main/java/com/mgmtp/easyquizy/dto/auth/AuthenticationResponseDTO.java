@@ -1,4 +1,4 @@
-package com.mgmtp.easyquizy.model.auth;
+package com.mgmtp.easyquizy.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mgmtp.easyquizy.dto.user.UserDTO;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
+public class AuthenticationResponseDTO {
     @JsonProperty("access_token")
     private String accessToken;
     private UserDTO user;
