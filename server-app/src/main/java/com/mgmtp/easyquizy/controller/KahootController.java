@@ -76,7 +76,7 @@ public class KahootController {
             ),
             @ApiResponse(responseCode = "401", description = "Kahoot authentication fail")
     })
-    @GetMapping("/export/quiz/{id}")
+    @PostMapping("/export/quiz/{id}")
     public KahootExportQuizResponseDTO exportQuiz(@Parameter(description = "The id of the quiz to export") @PathVariable long id) {
         return kahootService.exportQuiz(id);
     }

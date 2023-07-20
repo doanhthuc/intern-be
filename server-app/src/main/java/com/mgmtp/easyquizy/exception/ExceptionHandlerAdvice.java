@@ -236,8 +236,8 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleKahootUnauthorizedException(KahootUnauthorizedException ex) {
         Map<String, String> errors = new HashMap<>();
         String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
+        errors.put("kahoot", message);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
     /**
