@@ -19,6 +19,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.util.List;
 
 @Tag(name = "Event")
 @RestController
@@ -81,12 +82,25 @@ public class EventController {
             @Min(value = 0, message = "Offset must be greater than or equal to 0") int offset,
             @Parameter(description = "The maximum number of results to return")
             @RequestParam(name = "limit", required = false) Integer limit,
+            @RequestParam(name = "year", required = false) Integer year,
             @Parameter(description = "The keyword to search for")
             @RequestParam(name = "keyword", required = false) String keyword) {
         if (limit == null) {
             limit = defaultPageSize;
         }
-        return eventService.getAllEvent(keyword, offset, limit);
+        return eventService.getAllEvent(keyword, year , offset, limit);
+    }
+
+    @Operation(summary = "Get all years", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found all years",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Authentication fail"),
+            @ApiResponse(responseCode = "401", description = "Authorization fail")
+    })
+    @GetMapping("/years")
+    public List<Integer> getAllYear() {
+        return eventService.getAllYear();
     }
 
     /**

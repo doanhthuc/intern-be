@@ -26,11 +26,11 @@ public class EventEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date", nullable = false )
     private LocalDate endDate;
 
-    @Column(name = "location", nullable = false)
-    private String location;
+    @Column(name = "description")
+    private String description;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "eventEntity")
     private List<QuizEntity> quizEntity;

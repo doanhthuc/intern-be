@@ -23,7 +23,6 @@ public class EventDTO {
     @NotNull
     private LocalDate endDate;
 
-    @NotEmpty
-    @Size(max = 255, message = "Location must not be exceed 255 characters")
-    private String location;
+    @Size(max = 255, message = "Description must not be exceed 255 characters")
+    private String description;
 }

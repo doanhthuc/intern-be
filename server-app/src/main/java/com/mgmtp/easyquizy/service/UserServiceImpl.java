@@ -90,8 +90,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         CharacterRule upperCaseRule = new CharacterRule(EnglishCharacterData.UpperCase, 1);
         CharacterRule lowerCaseRule = new CharacterRule(EnglishCharacterData.LowerCase, 1);
         CharacterRule digitRule = new CharacterRule(EnglishCharacterData.Digit, 1);
-        CharacterRule specialCharRule = new CharacterRule(EnglishCharacterData.Special, 1);
-        String newPassword = passwordGenerator.generatePassword(8, upperCaseRule, lowerCaseRule, digitRule, specialCharRule);
+        String newPassword = passwordGenerator.generatePassword(8, upperCaseRule, lowerCaseRule, digitRule);
 
         String encodeNewPassword = passwordEncoder.encode(newPassword);
         userEntity.setPassword(encodeNewPassword);

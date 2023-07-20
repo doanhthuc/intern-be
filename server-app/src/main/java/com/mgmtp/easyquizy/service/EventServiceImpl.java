@@ -34,6 +34,11 @@ public class EventServiceImpl implements EventService {
     QuizService quizService;
 
     @Override
+    public List<Integer> getAllYear() {
+        return eventRepository.findDistinctByStartDate_Year();
+    }
+
+    @Override
     public EventDTO createEvent(EventDTO eventDTO) {
         eventDTO.setId(null);
         EventEntity created = eventMapper.eventDtoToEventEntity(eventDTO);
@@ -42,12 +47,15 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventDTO> getAllEvent(String keyword, int offset, int limit) {
+    public Page<EventDTO> getAllEvent(String keyword, Integer year, int offset, int limit) {
         int pageNo = offset / limit;
         Specification<EventEntity> filterSpec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (keyword != null && !keyword.isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("title")), "%" + keyword.toLowerCase() + "%"));
+            }
+            if (year != null) {
+                predicates.add(cb.equal(cb.function("year", Integer.class, root.get("startDate")), year));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -68,7 +76,7 @@ public class EventServiceImpl implements EventService {
         updated.setTitle(eventDTO.getTitle());
         updated.setStartDate(eventDTO.getStartDate());
         updated.setEndDate(eventDTO.getEndDate());
-        updated.setLocation(eventDTO.getLocation());
+        updated.setDescription(eventDTO.getDescription());
         eventRepository.save(updated);
         return eventMapper.eventEntityToEventDto(updated);
     }
