@@ -30,6 +30,9 @@ public class AttachmentEntity {
     @Column
     private String kahootUrl;
 
+    @Column
+    private Boolean isUploaded;
+
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "attachment")
     @JsonIgnore
     private QuestionEntity question;

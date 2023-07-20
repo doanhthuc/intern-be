@@ -70,6 +70,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         if (question.getAttachment() != null) {
             question.getAttachment().setId(null);
+            question.getAttachment().setIsUploaded(false);
         }
 
         QuestionEntity savedQuestion = questionRepository.save(question);
@@ -91,6 +92,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         if (question.getAttachment() != null) {
             question.getAttachment().setId(null);
+            question.getAttachment().setIsUploaded(false);
         }
         if (existingQuestion.getAttachment() != null) {
             attachmentRepository.deleteById(existingQuestion.getAttachment().getId());
