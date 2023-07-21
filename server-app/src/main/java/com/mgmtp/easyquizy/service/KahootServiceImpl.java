@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
+import com.mgmtp.easyquizy.exception.kahoot.EncryptionException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootCreateDraftException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootPublishDraftException;
@@ -23,6 +24,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.*;
+import java.util.Base64;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +62,15 @@ public class KahootServiceImpl implements KahootService {
 
     private final KahootQuizMapper kahootQuizMapper;
 
+    @Value("${kahoot.secret-key}")
+    private String kahootSecretKey;
+
+    @Value("${kahoot.AES_ALGORITHM}")
+    private String AES_ALGORITHM;
+
+    @Value("${kahoot.AES_PROVIDER}")
+    private String AES_PROVIDER;
+
     /**
      * Retrieves a Kahoot account from the repository.
      *
@@ -66,24 +83,72 @@ public class KahootServiceImpl implements KahootService {
             return null;
         }
         KahootAccountEntity kahootAccountEntity = kahootAccountEntityOptional.get();
-        if (kahootAccountEntity.getExpireTime() < System.currentTimeMillis()) {
-            kahootAccountRepository.deleteById(kahootAccountEntity.getUuid());
-            return null;
-        }
+        String kahootUsername = kahootAccountEntity.getUsername();
+        String kahootPassword = kahootAccountEntity.getKahootPassword();
+        String kahootToken = kahootAccountEntity.getAccessToken();
+
         try {
             new RestClient()
-                    .setBearerToken(kahootAccountEntity.getAccessToken())
+                    .setBearerToken(kahootToken)
                     .setContentType(MediaType.APPLICATION_JSON_VALUE)
                     .setUrl(LOG_IN_URL)
                     .setMethod("GET")
                     .call(KahootUserResponseDto.class);
         } catch (HttpErrorStatusException e) {
-            if (e.getStatusCode() == 401) {
-                kahootAccountRepository.deleteById(kahootAccountEntity.getUuid());
-                return null;
+            if (e.getStatusCode() == 401 || e.getStatusCode() == 400) {
+                KahootAccountEntity getKahootByCredentials = getUserByExistingCredentials(kahootUsername, kahootPassword);
+                if (getKahootByCredentials != null) {
+                    kahootAccountEntity = getKahootByCredentials;
+                } else {
+                    return null;
+                }
             }
         }
         return kahootAccountEntity;
+    }
+
+    @Override
+    public KahootAccountEntity getUserByExistingCredentials(String kahootUsername, String kahootPassword) {
+        byte[] keyBytes = DatatypeConverter.parseHexBinary(kahootSecretKey);
+        KahootAccountEntity kahootAccountEntity;
+        try {
+            SecretKey secretKey = generateSecretKey(keyBytes);
+            String decryptedPassword = decryptPassword(kahootPassword, secretKey);
+            KahootAuthenticationRequestDTO authenticationRequest = new KahootAuthenticationRequestDTO(kahootUsername, decryptedPassword);
+            authenticate(authenticationRequest);
+            kahootAccountEntity = kahootAccountRepository.findFirstByOrderByUuid().orElse(null);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException |
+                 IllegalBlockSizeException | NoSuchPaddingException | NoSuchProviderException ex) {
+            throw new EncryptionException("Error occurred during encryption or saving account", ex);
+        }
+        return kahootAccountEntity;
+    }
+
+    @Override
+    public SecretKey generateSecretKey(byte[] keyBytes) throws NoSuchAlgorithmException, NoSuchProviderException {
+        Security.addProvider(new BouncyCastleProvider());
+        return new SecretKeySpec(keyBytes, AES_ALGORITHM);
+    }
+
+    @Override
+    public String encryptPassword(String plaintext, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException {
+        Security.addProvider(new BouncyCastleProvider());
+        Cipher cipher = Cipher.getInstance(AES_ALGORITHM, AES_PROVIDER);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        byte[] encryptedBytes = cipher.doFinal(plaintext.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    @Override
+    public String decryptPassword(String ciphertext, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException {
+        Security.addProvider(new BouncyCastleProvider());
+        Cipher cipher = Cipher.getInstance(AES_ALGORITHM, AES_PROVIDER);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        byte[] decodedBytes = Base64.getDecoder().decode(ciphertext);
+        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+        return new String(decryptedBytes);
     }
 
     @Override
@@ -94,6 +159,7 @@ public class KahootServiceImpl implements KahootService {
                 .grant_type("password")
                 .build();
         KahootUserResponseDto responseBody = null;
+
         try {
             responseBody = new RestClient()
                     .setJsonRequestBody(kahootUserRequestDto)
@@ -103,11 +169,24 @@ public class KahootServiceImpl implements KahootService {
                     .call(KahootUserResponseDto.class);
         } catch (HttpErrorStatusException e) {
             if (e.getStatusCode() == 401) {
+                kahootAccountRepository.deleteAll();
                 throw new IllegalStateException("Username or password error!");
             }
         }
-        KahootAccountEntity kahootAccountEntity =
-                kahootAccountRepository.save(kahootAccountMapper.userResponseDtoToAccountEntity(responseBody));
+
+        KahootAccountEntity kahootAccountEntity = kahootAccountMapper.userResponseDtoToAccountEntity(responseBody);
+
+        byte[] keyBytes = DatatypeConverter.parseHexBinary(kahootSecretKey);
+        try {
+            SecretKey secretKey = generateSecretKey(keyBytes);
+            String encryptedPassword = encryptPassword(authenticationRequest.getPassword(), secretKey);
+            kahootAccountEntity.setKahootPassword(encryptedPassword);
+            kahootAccountRepository.save(kahootAccountEntity);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException |
+                 IllegalBlockSizeException | NoSuchPaddingException | NoSuchProviderException e) {
+            throw new EncryptionException("Error occurred during encryption or saving account", e);
+        }
+
         KahootUserStatusResponseDto userStatusResponseDto =
                 kahootAccountMapper.kahootAccountEntityToUserStatusDto(kahootAccountEntity);
         userStatusResponseDto.setIsConnected(true);

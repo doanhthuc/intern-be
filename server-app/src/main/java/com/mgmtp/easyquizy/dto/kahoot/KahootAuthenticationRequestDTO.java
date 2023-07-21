@@ -1,11 +1,13 @@
 package com.mgmtp.easyquizy.dto.kahoot;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Data
+@AllArgsConstructor
 public class KahootAuthenticationRequestDTO {
     @NotBlank(message = "Username is required")
     private String username;

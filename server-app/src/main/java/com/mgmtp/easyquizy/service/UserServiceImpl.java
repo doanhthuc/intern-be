@@ -9,8 +9,8 @@ import com.mgmtp.easyquizy.model.role.RoleEntity;
 import com.mgmtp.easyquizy.model.user.UserEntity;
 import com.mgmtp.easyquizy.repository.RoleRepository;
 import com.mgmtp.easyquizy.repository.UserRepository;
-import com.mgmtp.easyquizy.security.JwtService;
 import lombok.extern.slf4j.Slf4j;
+import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
@@ -20,25 +20,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    @Autowired
-    private JwtService jwtService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -90,7 +88,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         CharacterRule upperCaseRule = new CharacterRule(EnglishCharacterData.UpperCase, 1);
         CharacterRule lowerCaseRule = new CharacterRule(EnglishCharacterData.LowerCase, 1);
         CharacterRule digitRule = new CharacterRule(EnglishCharacterData.Digit, 1);
-        String newPassword = passwordGenerator.generatePassword(8, upperCaseRule, lowerCaseRule, digitRule);
+        CharacterData specialCharacterCustom = new CharacterData() {
+            public static final String REGEX_SPECIAL = "ư!@#$%^&*()-_+=[]{};:',.<>/?";
+            @Override
+            public String getErrorCode() {
+                return "INSUFFICIENT_SPECIAL";
+            }
+
+            @Override
+            public String getCharacters() {
+                return REGEX_SPECIAL;
+            }
+        };
+        CharacterRule specialCharRule = new CharacterRule(specialCharacterCustom, 1);
+        String newPassword = passwordGenerator.generatePassword(8, upperCaseRule, lowerCaseRule, digitRule, specialCharRule);
 
         String encodeNewPassword = passwordEncoder.encode(newPassword);
         userEntity.setPassword(encodeNewPassword);
@@ -126,6 +137,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDTO updateUser(UserDTO userDTO) {
+        if (userDTO.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID is a required field");
+        }
+
         UserEntity userEntity = userRepository.findById(userDTO.getId()).orElseThrow(() ->
                 new RecordNotFoundException("No User record exists for the given id: " + userDTO.getId()));
         UserEntity updated = userMapper.userDtoToUserEntity(userDTO);

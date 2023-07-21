@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.model.kahoot;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,4 +26,8 @@ public class KahootAccountEntity {
 
     @Column(name = "expire_time", nullable = false)
     private Long expireTime;
+
+    @Column(name = "encrypted_kahoot_password")
+    @JsonIgnore
+    private String kahootPassword;
 }

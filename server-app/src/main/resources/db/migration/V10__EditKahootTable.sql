@@ -1,0 +1,1 @@
+ALTER TABLE kahoot_account ADD COLUMN encrypted_kahoot_password VARCHAR(255) DEFAULT NULL;
