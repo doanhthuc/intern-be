@@ -28,7 +28,6 @@ public class KahootServiceImpl implements KahootService {
     private static final String FOLDER_URL_TEMPLATE = "https://create.kahoot.it/rest/folders/%s";
     private static final String CREATE_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts";
     private static final String PUBLISH_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts/%s/publish";
-    private static final String QUIZ_URL = "https://create.kahoot.it/creator/%s";
 
     private final KahootAccountRepository kahootAccountRepository;
 
@@ -158,7 +157,7 @@ public class KahootServiceImpl implements KahootService {
             JsonNode response = restClient.setUrl(String.format(PUBLISH_QUIZ_DRAFT_URL, draftID))
                     .setMethod("POST")
                     .call(JsonNode.class);
-            return new KahootExportQuizResponseDTO(String.format(QUIZ_URL, response.get("uuid").asText()));
+            return new KahootExportQuizResponseDTO(response.get("uuid").asText());
         } catch (HttpErrorStatusException e) {
             throw new KahootPublishDraftException();
         }
@@ -179,7 +178,7 @@ public class KahootServiceImpl implements KahootService {
     }
 
     @Override
-    public KahootExportQuizResponseDTO exportQuiz(long id) {
+    public void exportQuiz(long id) {
         KahootAccountEntity kahootAccount = getKahootAccount();
         if (kahootAccount == null) {
             throw new KahootUnauthorizedException();
@@ -200,6 +199,6 @@ public class KahootServiceImpl implements KahootService {
         KahootQuizDTO kahootQuizDTO = kahootQuizMapper.quizToKahootQuizDTO(quiz.get(), folderId);
         KahootCreateDraftRequestDTO kahootCreateDraftRequestDTO = new KahootCreateDraftRequestDTO(kahootQuizDTO);
 
-        return createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
+        createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
     }
 }

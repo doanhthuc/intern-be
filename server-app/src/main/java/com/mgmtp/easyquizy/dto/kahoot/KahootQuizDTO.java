@@ -12,4 +12,6 @@ public class KahootQuizDTO {
     private String title;
     @Builder.Default
     private String quizType = "quiz";
+    @Builder.Default
+    private String language = "English";
 }

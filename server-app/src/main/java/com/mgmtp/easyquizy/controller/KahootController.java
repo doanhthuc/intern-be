@@ -1,7 +1,6 @@
 package com.mgmtp.easyquizy.controller;
 
 import com.mgmtp.easyquizy.dto.kahoot.KahootAuthenticationRequestDTO;
-import com.mgmtp.easyquizy.dto.kahoot.KahootExportQuizResponseDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
@@ -77,8 +76,9 @@ public class KahootController {
             @ApiResponse(responseCode = "401", description = "Kahoot authentication fail")
     })
     @PostMapping("/export/quiz/{id}")
-    public KahootExportQuizResponseDTO exportQuiz(@Parameter(description = "The id of the quiz to export") @PathVariable long id) {
-        return kahootService.exportQuiz(id);
+    public ResponseEntity<Object> exportQuiz(@Parameter(description = "The id of the quiz to export") @PathVariable long id) {
+        kahootService.exportQuiz(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Create a new folder on Kahoot", security = {@SecurityRequirement(name = "bearer-key")})

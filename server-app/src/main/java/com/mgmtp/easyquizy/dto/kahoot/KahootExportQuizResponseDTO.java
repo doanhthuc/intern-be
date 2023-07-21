@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class KahootExportQuizResponseDTO {
-    private String url;
+    private String kahootQuizId;
 }
