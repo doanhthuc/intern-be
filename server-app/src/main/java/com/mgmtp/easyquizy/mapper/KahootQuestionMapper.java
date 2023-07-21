@@ -10,6 +10,7 @@ public interface KahootQuestionMapper {
     @Mapping(target = "question", source = "questionEntity.title")
     @Mapping(target = "time", expression = "java(questionEntity.getTimeLimit() * 1000)")
     @Mapping(target = "choices", source = "questionEntity.answers")
+    @Mapping(target = "image", source = "questionEntity.attachment.kahootUrl")
     KahootQuestionDTO questionToKahootQuestionDTO(QuestionEntity questionEntity);
 }
 

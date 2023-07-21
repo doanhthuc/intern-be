@@ -5,21 +5,30 @@ import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootCreateDraftException;
+import com.mgmtp.easyquizy.exception.kahoot.KahootException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootPublishDraftException;
 import com.mgmtp.easyquizy.exception.kahoot.KahootUnauthorizedException;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
+import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
+import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.repository.KahootAccountRepository;
+import com.mgmtp.easyquizy.repository.QuestionRepository;
 import com.mgmtp.easyquizy.repository.QuizRepository;
+import com.mgmtp.easyquizy.utils.ConvertBase64ToFile;
 import com.mgmtp.easyquizy.utils.RestClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +37,18 @@ public class KahootServiceImpl implements KahootService {
     private static final String FOLDER_URL_TEMPLATE = "https://create.kahoot.it/rest/folders/%s";
     private static final String CREATE_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts";
     private static final String PUBLISH_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts/%s/publish";
+    private static final String UPLOAD_IMAGE_URL = "https://apis.kahoot.it/media-api/media/upload";
+    @Value("${easy-quizy.api.max-upload-image-thread}")
+    private int MAX_UPLOAD_IMAGE_THREAD;
+
+    @Value("${easy-quizy.api.max-upload-image-timeout-seconds}")
+    private int MAX_UPLOAD_IMAGE_TIMEOUT;
 
     private final KahootAccountRepository kahootAccountRepository;
 
     private final QuizRepository quizRepository;
+
+    private final QuestionRepository questionRepository;
 
     private final KahootAccountMapper kahootAccountMapper;
 
@@ -133,7 +150,7 @@ public class KahootServiceImpl implements KahootService {
             throw new IllegalStateException("No valid Kahoot account found!");
         }
         String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
-        KahootFolderDTO kahootFolderDTO = null;
+        KahootFolderDTO kahootFolderDTO;
         try {
             kahootFolderDTO = new RestClient()
                     .setBearerToken(kahootAccount.getAccessToken())
@@ -189,6 +206,25 @@ public class KahootServiceImpl implements KahootService {
             throw new RecordNotFoundException("The quiz with id " + id + " does not exist");
         }
 
+        List<QuestionEntity> questionsHaveUnUploadedImage = quiz.get().getQuestions().stream()
+                .filter(question -> !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
+                .toList();
+
+        if (!questionsHaveUnUploadedImage.isEmpty()) {
+            AttachmentEntity[] attachments = questionsHaveUnUploadedImage.stream()
+                    .map(QuestionEntity::getAttachment)
+                    .toArray(AttachmentEntity[]::new);
+
+            ConcurrentMap<Long, String> concurrentMap = uploadImages(attachments, kahootAccount.getAccessToken());
+            questionsHaveUnUploadedImage.forEach(question -> {
+                String imageUri = concurrentMap.get(question.getAttachment().getId());
+                question.getAttachment().setKahootUrl(imageUri);
+                question.getAttachment().setIsUploaded(true);
+            });
+
+            questionRepository.saveAll(questionsHaveUnUploadedImage);
+        }
+
         RestClient restClient = new RestClient()
                 .setBearerToken(kahootAccount.getAccessToken())
                 .setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -200,5 +236,31 @@ public class KahootServiceImpl implements KahootService {
         KahootCreateDraftRequestDTO kahootCreateDraftRequestDTO = new KahootCreateDraftRequestDTO(kahootQuizDTO);
 
         createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
+    }
+
+    @Override
+    public ConcurrentMap<Long, String> uploadImages(AttachmentEntity[] attachments, String token) {
+        ConcurrentMap<Long, String> concurrentMap = new ConcurrentHashMap<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(MAX_UPLOAD_IMAGE_THREAD);
+        List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
+
+        for (AttachmentEntity attachment : attachments) {
+        CompletableFuture<Void> uploadFuture = CompletableFuture.supplyAsync(
+                () -> {
+                    UploadImageToKahootResultDto res = ConvertBase64ToFile.convertAndUploadImage(attachment.getImageData(),
+                            UPLOAD_IMAGE_URL, token);
+                    if (res == null) {
+                        throw new KahootException("Failed to upload image to Kahoot!");
+                    }
+                    concurrentMap.put(attachment.getId(), res.getUri());
+                    return null;
+            }, executorService);
+            uploadFuture.orTimeout(MAX_UPLOAD_IMAGE_TIMEOUT, TimeUnit.SECONDS);
+            uploadFutures.add(uploadFuture);
+        }
+        CompletableFuture.allOf(uploadFutures.toArray(CompletableFuture[]::new)).join();
+
+        executorService.shutdown();
+        return concurrentMap;
     }
 }

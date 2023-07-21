@@ -20,6 +20,4 @@ public class AttachmentDTO {
     private String sourceCode;
 
     private String kahootUrl;
-
-    private Boolean isUploaded;
 }

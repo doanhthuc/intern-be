@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService service;
-
     /**
      * Retrive all person data
      *
