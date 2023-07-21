@@ -26,7 +26,21 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
-    static final String ERROR = "error";
+    static final String DEFAULT_ERROR_NAME = "error";
+
+    /**
+     * Creates a map containing the error message of the given exception.
+     *
+     * @param errorName the key to use for the error message in the map
+     * @param ex the exception to get the error message from
+     * @return a map containing the error message of the given exception
+     */
+    private Map<String, String> getError(String errorName, Exception ex){
+        Map<String, String> errors = new HashMap<>();
+        String message = ex.getMessage();
+        errors.put(errorName, message);
+        return errors;
+    }
 
     /**
      * This method handles ConstraintViolationException by returning a map of errors.
@@ -79,20 +93,14 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        Map<String, String> error = new HashMap<>();
         String fieldName = ex.getParameterName();
-        String message = ex.getMessage();
-        error.put(fieldName, message);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(fieldName, ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {RecordNotFoundException.class})
     @ResponseBody
     public ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -129,7 +137,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
             error.put(fieldName, message);
         } else {
             String message = "Invalid request body format.";
-            error.put(ERROR, message);
+            error.put(DEFAULT_ERROR_NAME, message);
         }
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
@@ -142,7 +150,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler({Exception.class})
     public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         Map<String, String> error = new HashMap<>();
-        error.put(ERROR, "An internal server error occurred. Please try again later.");
+        error.put(DEFAULT_ERROR_NAME, "An internal server error occurred. Please try again later.");
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -156,7 +164,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleNoHandlerFoundException(
             NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         Map<String, String> error = new HashMap<>();
-        error.put(ERROR, "Resource not found.");
+        error.put(DEFAULT_ERROR_NAME, "Resource not found.");
         return new ResponseEntity<>(error, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
@@ -180,10 +188,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {DuplicatedQuestionException.class})
     @ResponseBody
     public ResponseEntity<Object> handleDuplicatedQuestionException(DuplicatedQuestionException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -195,10 +200,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {NoMatchEventIdException.class})
     @ResponseBody
     public ResponseEntity<Object> handleNoMatchEventIdException(NoMatchEventIdException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -210,10 +212,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {IllegalStateException.class})
     @ResponseBody
     public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME,ex), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -225,19 +224,13 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {QuestionAssociatedWithQuizzesException.class})
     @ResponseBody
     public ResponseEntity<Object> handleQuestionAssociatedWithQuizzesException(QuestionAssociatedWithQuizzesException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME,ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {KahootUnauthorizedException.class})
     @ResponseBody
     public ResponseEntity<Object> handleKahootUnauthorizedException(KahootUnauthorizedException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put("kahoot", message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError("kahoot", ex), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -249,10 +242,18 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {ResponseStatusException.class})
     @ResponseBody
     public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String message = ex.getMessage();
-        errors.put(ERROR, message);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles UnsatisfiableQuizConstraintsException by returning a ResponseEntity with an error message and the corresponding HttpStatus.
+     * UnsatisfiableQuizConstraintsException is thrown when it is not possible to generate a quiz that meets the given constraints.
+     *
+     */
+    @ExceptionHandler(value = {UnsatisfiableQuizConstraintsException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleUnsatisfiableQuizConstraintsException(UnsatisfiableQuizConstraintsException ex) {
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 }
 

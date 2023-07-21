@@ -1,5 +1,6 @@
 package com.mgmtp.easyquizy.utils;
 
+import com.mgmtp.easyquizy.exception.UnsatisfiableQuizConstraintsException;
 import com.mgmtp.easyquizy.model.question.Difficulty;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 
@@ -10,13 +11,12 @@ public class QuizGenerator {
     /**
      * Generates a quiz by selecting questions based on constraints using a greedy selection strategy.
      *
-     * @param questions                The list of available questions.
-     * @param totalTime                The total time limit for the quiz.
-     * @param categoryPercentages      A map containing category IDs as keys and corresponding percentages as values,
-     *                                 representing the maximum time percentage allowed for each category.
-     * @param maxDifficultyPercentages A map containing Difficulties as keys and corresponding percentages as values,
-     *                                 representing the maximum time percentage allowed for each difficulty.
+     * @param questions           The list of available questions.
+     * @param totalTime           The total time limit for the quiz.
+     * @param categoryPercentages A map containing category IDs as keys and corresponding percentages as values,
+     *                            representing the maximum time percentage allowed for each category.
      * @return A list of QuestionEntity objects representing the generated quiz.
+     * @throws UnsatisfiableQuizConstraintsException  if the quiz cannot be generated to meet the constraints.
      */
     public static List<QuestionEntity> generateQuiz(List<QuestionEntity> questions, int totalTime, Map<Long, Double> categoryPercentages) {
 
@@ -98,6 +98,10 @@ public class QuizGenerator {
                     break;
                 }
             }
+        }
+
+        if (quizTotalTime < totalTime - 60) {
+            throw new UnsatisfiableQuizConstraintsException();
         }
 
         // Shuffle the quiz to avoid any patterns in questions’ ordering caused by the algorithm
