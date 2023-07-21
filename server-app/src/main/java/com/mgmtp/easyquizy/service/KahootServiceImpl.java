@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
-import com.mgmtp.easyquizy.exception.kahoot.EncryptionException;
-import com.mgmtp.easyquizy.exception.kahoot.KahootCreateDraftException;
-import com.mgmtp.easyquizy.exception.kahoot.KahootException;
-import com.mgmtp.easyquizy.exception.kahoot.KahootPublishDraftException;
-import com.mgmtp.easyquizy.exception.kahoot.KahootUnauthorizedException;
+import com.mgmtp.easyquizy.exception.kahoot.*;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
@@ -21,21 +17,19 @@ import com.mgmtp.easyquizy.repository.QuizRepository;
 import com.mgmtp.easyquizy.utils.ConvertBase64ToFile;
 import com.mgmtp.easyquizy.utils.RestClient;
 import lombok.RequiredArgsConstructor;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-import java.security.*;
-import java.util.Base64;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Service
@@ -46,6 +40,7 @@ public class KahootServiceImpl implements KahootService {
     private static final String CREATE_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts";
     private static final String PUBLISH_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts/%s/publish";
     private static final String UPLOAD_IMAGE_URL = "https://apis.kahoot.it/media-api/media/upload";
+
     @Value("${easy-quizy.api.max-upload-image-thread}")
     private int MAX_UPLOAD_IMAGE_THREAD;
 
@@ -223,29 +218,32 @@ public class KahootServiceImpl implements KahootService {
     }
 
     @Override
+    @SuppressWarnings("squid:S1860")
     public KahootFolderDTO getOrCreateFolder(String folderName) {
-        KahootAccountEntity kahootAccount = getKahootAccount();
-        if (kahootAccount == null) {
-            throw new IllegalStateException("No valid Kahoot account found!");
+        synchronized (folderName.intern()) {
+            KahootAccountEntity kahootAccount = getKahootAccount();
+            if (kahootAccount == null) {
+                throw new IllegalStateException("No valid Kahoot account found!");
+            }
+            String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
+            KahootFolderDTO kahootFolderDTO;
+            try {
+                kahootFolderDTO = new RestClient()
+                        .setBearerToken(kahootAccount.getAccessToken())
+                        .setContentType(MediaType.APPLICATION_JSON_VALUE)
+                        .setUrl(rootFolderUrl)
+                        .setMethod("GET")
+                        .call(KahootFolderDTO.class);
+            } catch (HttpErrorStatusException e) {
+                throw new IllegalStateException("Failed to retrieve Kahoot folder information!");
+            }
+            Optional<KahootFolderDTO> existingFolder = Optional.ofNullable(kahootFolderDTO)
+                    .orElseThrow(KahootUnauthorizedException::new)
+                    .getFolders().stream()
+                    .filter(folder -> folder.getName().equals(folderName))
+                    .findFirst();
+            return existingFolder.orElseGet(() -> createFolder(folderName));
         }
-        String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
-        KahootFolderDTO kahootFolderDTO;
-        try {
-            kahootFolderDTO = new RestClient()
-                    .setBearerToken(kahootAccount.getAccessToken())
-                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
-                    .setUrl(rootFolderUrl)
-                    .setMethod("GET")
-                    .call(KahootFolderDTO.class);
-        } catch (HttpErrorStatusException e) {
-            throw new IllegalStateException("Failed to retrieve Kahoot folder information!");
-        }
-        Optional<KahootFolderDTO> existingFolder = Optional.ofNullable(kahootFolderDTO)
-                .orElseThrow(KahootUnauthorizedException::new)
-                .getFolders().stream()
-                .filter(folder -> folder.getName().equals(folderName))
-                .findFirst();
-        return existingFolder.orElseGet(() -> createFolder(folderName));
     }
 
     private KahootExportQuizResponseDTO publishDraft(RestClient restClient, String draftID) {
@@ -286,7 +284,7 @@ public class KahootServiceImpl implements KahootService {
         }
 
         List<QuestionEntity> questionsHaveUnUploadedImage = quiz.get().getQuestions().stream()
-                .filter(question -> !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
+                .filter(question -> question.getAttachment() != null && !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
                 .toList();
 
         if (!questionsHaveUnUploadedImage.isEmpty()) {
