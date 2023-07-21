@@ -13,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -66,6 +68,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDTO getEventById(Long id) throws RecordNotFoundException {
+        if (id == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID is required");}
         Optional<EventEntity> eventEntity = eventRepository.findById(id);
         return eventMapper.eventEntityToEventDto(eventEntity.orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id")));
     }
