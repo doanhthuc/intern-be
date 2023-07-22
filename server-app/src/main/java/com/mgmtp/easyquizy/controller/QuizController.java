@@ -1,11 +1,11 @@
 package com.mgmtp.easyquizy.controller;
 
-import com.mgmtp.easyquizy.dto.event.EventDTO;
 import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
 import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
-import com.mgmtp.easyquizy.service.QuizServiceImpl;
+import com.mgmtp.easyquizy.exception.RecordNotFoundException;
+import com.mgmtp.easyquizy.service.QuizService;
 import com.mgmtp.easyquizy.validator.GenerateQuizRequestDTOValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +18,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +32,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/quizzes")
 public class QuizController {
-    private final QuizServiceImpl quizService;
+    private final QuizService quizService;
 
     @Value("${easy-quizy.api.default-page-size}")
     private int defaultPageSize;
@@ -48,7 +50,7 @@ public class QuizController {
      * @param quiz information for insert
      * @return Newly created quiz
      */
-    @Operation(summary = "Create a new quiz", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Create a new quiz", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Create a new quiz successfully",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = QuizDtoDetail.class))}),
@@ -71,7 +73,7 @@ public class QuizController {
      * @param keyword the keyword to search for
      * @return List all the quizzes from an event
      */
-    @Operation(summary = "Get all quiz from an event with paging, filtering (if needed)", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Get all quiz from an event with paging, filtering (if needed)", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found quizzes",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = QuizDtoDetail.class))}),
@@ -101,7 +103,7 @@ public class QuizController {
      * @param id quiz's id
      * @return quiz's information by id
      */
-    @Operation(summary = "Get an quiz by its id", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Get an quiz by its id", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Event found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = QuizDtoDetail.class))}),
@@ -119,7 +121,7 @@ public class QuizController {
      * @param quiz information for update a quiz
      * @return Updated quiz
      */
-    @Operation(summary = "Update an quiz", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Update an quiz", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Quiz updated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = QuizDtoDetail.class))}),
@@ -139,24 +141,26 @@ public class QuizController {
      * @param id Quiz's id
      * @return String "DELETED"
      */
-    @Operation(summary = "Delete an quiz by its id", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Delete an quiz by its id", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Quiz deleted",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EventDTO.class))}),
+                    content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "403", description = "Authentication fail"),
             @ApiResponse(responseCode = "401", description = "Authorization fail")
     })
     @DeleteMapping("/{id}")
-    public String deleteQuizById(
-            @PathVariable("id") Long id) {
-        quizService.deleteQuizById(id);
-        return "DELETED";
+    public ResponseEntity<Void> deleteQuizById(
+            @Parameter(description = "Option delete kahoot quiz")
+            @RequestParam(name = "deleteKahootQuiz", required = false, defaultValue = "false") boolean deleteKahootQuiz,
+            @PathVariable("id") Long id) throws RecordNotFoundException {
+        quizService.deleteQuizById(id, deleteKahootQuiz);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(summary = "Generate a quiz based on constraints", security = { @SecurityRequirement(name = "bearer-key") })
+    @Operation(summary = "Generate a quiz based on constraints", security = {@SecurityRequirement(name = "bearer-key")})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Generate a quiz successfully",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(type = "array",implementation = QuestionListViewDTO.class))}),
+                    content = {@Content(mediaType = "application/json", schema = @Schema(type = "array", implementation = QuestionListViewDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Method arguments not valid"),
             @ApiResponse(responseCode = "403", description = "Authentication fail"),
             @ApiResponse(responseCode = "401", description = "Authorization fail")
@@ -166,5 +170,4 @@ public class QuizController {
             @Valid @RequestBody GenerateQuizRequestDTO generateQuizRequestDTO) {
         return quizService.generateQuiz(generateQuizRequestDTO);
     }
-
 }

@@ -9,14 +9,17 @@ import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
+import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.repository.KahootAccountRepository;
+import com.mgmtp.easyquizy.repository.KahootQuizExportStatusRepository;
 import com.mgmtp.easyquizy.repository.QuestionRepository;
 import com.mgmtp.easyquizy.repository.QuizRepository;
 import com.mgmtp.easyquizy.utils.ConvertBase64ToFile;
 import com.mgmtp.easyquizy.utils.RestClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -34,11 +37,13 @@ import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KahootServiceImpl implements KahootService {
     private static final String LOG_IN_URL = "https://create.kahoot.it/rest/authenticate";
     private static final String FOLDER_URL_TEMPLATE = "https://create.kahoot.it/rest/folders/%s";
     private static final String CREATE_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts";
     private static final String PUBLISH_QUIZ_DRAFT_URL = "https://create.kahoot.it/rest/drafts/%s/publish";
+    private static final String DELETE_QUIZ_URL = "https://create.kahoot.it/rest/kahoots/%s";
     private static final String UPLOAD_IMAGE_URL = "https://apis.kahoot.it/media-api/media/upload";
 
     @Value("${easy-quizy.api.max-upload-image-thread}")
@@ -50,6 +55,8 @@ public class KahootServiceImpl implements KahootService {
     private final KahootAccountRepository kahootAccountRepository;
 
     private final QuizRepository quizRepository;
+
+    private final KahootQuizExportStatusRepository kahootQuizExportStatusRepository;
 
     private final QuestionRepository questionRepository;
 
@@ -339,5 +346,26 @@ public class KahootServiceImpl implements KahootService {
 
         executorService.shutdown();
         return concurrentMap;
+    }
+
+    @Override
+    public void deleteKahootQuiz(long quizId) {
+        KahootAccountEntity kahootAccount = getKahootAccount();
+        if (kahootAccount == null) {
+            throw new KahootUnauthorizedException();
+        }
+        KahootQuizExportStatus kahootQuizExportStatus =
+                kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccount.getUuid(), quizId);
+        String quizRemoveUrl = String.format(DELETE_QUIZ_URL, kahootQuizExportStatus.getKahootQuizId());
+        try {
+            new RestClient()
+                    .setBearerToken(kahootAccount.getAccessToken())
+                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
+                    .setUrl(quizRemoveUrl)
+                    .setMethod("DELETE")
+                    .call(JsonNode.class);
+        } catch (HttpErrorStatusException ignored) {
+            log.error("The Kahoot quiz has been deleted in the Kahoot app.");
+        }
     }
 }

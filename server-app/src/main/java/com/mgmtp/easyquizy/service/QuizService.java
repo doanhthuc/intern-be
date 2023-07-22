@@ -1,7 +1,7 @@
 package com.mgmtp.easyquizy.service;
 
-import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
 import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
+import com.mgmtp.easyquizy.dto.quiz.GenerateQuizRequestDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
 import com.mgmtp.easyquizy.exception.DuplicatedQuestionException;
@@ -21,7 +21,7 @@ public interface QuizService {
 
     QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException, NoMatchEventIdException;
 
-    void deleteQuizById(Long id) throws RecordNotFoundException;
+    void deleteQuizById(Long id, boolean deleteKahootQuiz) throws RecordNotFoundException;
 
     List<QuestionListViewDTO> generateQuiz(GenerateQuizRequestDTO generateQuizRequestDTO);
 }

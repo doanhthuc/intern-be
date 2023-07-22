@@ -2,8 +2,10 @@ package com.mgmtp.easyquizy.model.quiz;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mgmtp.easyquizy.model.event.EventEntity;
+import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import lombok.*;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -28,6 +30,10 @@ public class QuizEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "quizzes")
     private List<QuestionEntity> questions;
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<KahootQuizExportStatus> kahootQuizUsers;
 
     public void setQuestions(List<QuestionEntity> questions) {
         this.questions = questions;

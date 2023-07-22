@@ -86,9 +86,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void deleteEventById(Long id) throws RecordNotFoundException {
-        EventEntity eventEntity = eventRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
+        EventEntity eventEntity = eventRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("No event records exist for the given id"));
         if(!eventEntity.getQuizEntity().isEmpty()) {
-            eventEntity.getQuizEntity().forEach(quizEntity -> quizService.deleteQuizById(quizEntity.getId()));
+            eventEntity.getQuizEntity().forEach(quizEntity -> quizService.deleteQuizById(quizEntity.getId(), false));
         }
         eventRepository.deleteById(eventEntity.getId());
     }

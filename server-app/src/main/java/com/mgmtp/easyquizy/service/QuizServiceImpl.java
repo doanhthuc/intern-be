@@ -30,8 +30,8 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,13 +51,15 @@ public class QuizServiceImpl implements QuizService {
 
     private final EventService eventService;
 
-    private List<QuestionEntity> createListQuestionEntity(List<Long> questionIds) throws RecordNotFoundException, DuplicatedQuestionException{
+    private final KahootService kahootService;
+
+    private List<QuestionEntity> createListQuestionEntity(List<Long> questionIds) throws RecordNotFoundException, DuplicatedQuestionException {
         List<Long> distinctQuestionIds = questionIds.stream().distinct().toList();
-        if(distinctQuestionIds.size() != questionIds.size()) {
+        if (distinctQuestionIds.size() != questionIds.size()) {
             throw new DuplicatedQuestionException("Duplicated question in the quiz");
         }
         List<QuestionEntity> questionEntityList = questionRepository.findAllById(distinctQuestionIds);
-        if(questionEntityList.size() != questionIds.size()) {
+        if (questionEntityList.size() != questionIds.size()) {
             throw new RecordNotFoundException("No question records exist for the given id");
         }
         return questionEntityList;
@@ -140,11 +142,14 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public void deleteQuizById(Long id) {
+    public void deleteQuizById(Long id, boolean deleteKahootQuiz) {
         QuizEntity quizEntity = quizRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("No quiz records exist for the given id"));
         quizEntity.getQuestions().forEach(
                 questionEntity -> questionEntity.getQuizzes().remove(quizEntity));
+        if (deleteKahootQuiz) {
+            kahootService.deleteKahootQuiz(id);
+        }
         quizRepository.deleteById(id);
     }
 
