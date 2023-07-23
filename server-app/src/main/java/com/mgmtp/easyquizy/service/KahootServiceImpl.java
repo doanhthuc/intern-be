@@ -3,13 +3,17 @@ package com.mgmtp.easyquizy.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mgmtp.easyquizy.dto.kahoot.*;
 import com.mgmtp.easyquizy.exception.HttpErrorStatusException;
+import com.mgmtp.easyquizy.exception.InvalidFieldsException;
+import com.mgmtp.easyquizy.exception.KahootExportQuizException;
 import com.mgmtp.easyquizy.exception.RecordNotFoundException;
 import com.mgmtp.easyquizy.exception.kahoot.*;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
+import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
+import com.mgmtp.easyquizy.model.kahoot.QuizUserId;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.repository.KahootAccountRepository;
@@ -290,6 +294,21 @@ public class KahootServiceImpl implements KahootService {
             throw new RecordNotFoundException("The quiz with id " + id + " does not exist");
         }
 
+        ExportStatus exportStatus = getExportStatus(id);
+        if (exportStatus == ExportStatus.EXPORTED || exportStatus == ExportStatus.EXPORTING) {
+            throw new KahootExportQuizException("This quiz is already exporting or has been exported to this kahoot account!");
+        }
+
+        KahootQuizExportStatus kahootQuizExportStatus = KahootQuizExportStatus.builder()
+                .quizUserId(QuizUserId.builder()
+                        .quizId(id)
+                        .kahootUserId(kahootAccount.getUuid())
+                        .build())
+                .quiz(quiz.get())
+                .exportStatus(ExportStatus.EXPORTING)
+                .build();
+        kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
+
         List<QuestionEntity> questionsHaveUnUploadedImage = quiz.get().getQuestions().stream()
                 .filter(question -> question.getAttachment() != null && !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
                 .toList();
@@ -319,7 +338,11 @@ public class KahootServiceImpl implements KahootService {
         KahootQuizDTO kahootQuizDTO = kahootQuizMapper.quizToKahootQuizDTO(quiz.get(), folderId);
         KahootCreateDraftRequestDTO kahootCreateDraftRequestDTO = new KahootCreateDraftRequestDTO(kahootQuizDTO);
 
-        createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
+        KahootExportQuizResponseDTO kahootExportQuizResponseDTO = createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
+
+        kahootQuizExportStatus.setKahootQuizId(kahootExportQuizResponseDTO.getKahootQuizId());
+        kahootQuizExportStatus.setExportStatus(ExportStatus.EXPORTED);
+        kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
     }
 
     @Override
@@ -329,16 +352,16 @@ public class KahootServiceImpl implements KahootService {
         List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
 
         for (AttachmentEntity attachment : attachments) {
-        CompletableFuture<Void> uploadFuture = CompletableFuture.supplyAsync(
-                () -> {
-                    UploadImageToKahootResultDto res = ConvertBase64ToFile.convertAndUploadImage(attachment.getImageData(),
-                            UPLOAD_IMAGE_URL, token);
-                    if (res == null) {
-                        throw new KahootException("Failed to upload image to Kahoot!");
-                    }
-                    concurrentMap.put(attachment.getId(), res.getUri());
-                    return null;
-            }, executorService);
+            CompletableFuture<Void> uploadFuture = CompletableFuture.supplyAsync(
+                    () -> {
+                        UploadImageToKahootResultDto res = ConvertBase64ToFile.convertAndUploadImage(attachment.getImageData(),
+                                UPLOAD_IMAGE_URL, token);
+                        if (res == null) {
+                            throw new KahootException("Failed to upload image to Kahoot!");
+                        }
+                        concurrentMap.put(attachment.getId(), res.getUri());
+                        return null;
+                    }, executorService);
             uploadFuture.orTimeout(MAX_UPLOAD_IMAGE_TIMEOUT, TimeUnit.SECONDS);
             uploadFutures.add(uploadFuture);
         }
@@ -354,18 +377,31 @@ public class KahootServiceImpl implements KahootService {
         if (kahootAccount == null) {
             throw new KahootUnauthorizedException();
         }
-        KahootQuizExportStatus kahootQuizExportStatus =
+        Optional<KahootQuizExportStatus> kahootQuizExportStatus =
                 kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccount.getUuid(), quizId);
-        String quizRemoveUrl = String.format(DELETE_QUIZ_URL, kahootQuizExportStatus.getKahootQuizId());
-        try {
-            new RestClient()
-                    .setBearerToken(kahootAccount.getAccessToken())
-                    .setContentType(MediaType.APPLICATION_JSON_VALUE)
-                    .setUrl(quizRemoveUrl)
-                    .setMethod("DELETE")
-                    .call(JsonNode.class);
-        } catch (HttpErrorStatusException ignored) {
-            log.error("The Kahoot quiz has been deleted in the Kahoot app.");
+        if (kahootQuizExportStatus.isPresent()) {
+            String quizRemoveUrl = String.format(DELETE_QUIZ_URL, kahootQuizExportStatus.get().getKahootQuizId());
+            try {
+                new RestClient()
+                        .setBearerToken(kahootAccount.getAccessToken())
+                        .setContentType(MediaType.APPLICATION_JSON_VALUE)
+                        .setUrl(quizRemoveUrl)
+                        .setMethod("DELETE")
+                        .call(JsonNode.class);
+            } catch (HttpErrorStatusException ignored) {
+                log.error("The Kahoot quiz has been deleted in the Kahoot app.");
+            }
+        } else {
+            throw InvalidFieldsException.fromFieldError("deleteKahootQuiz", "The quiz has not been exported yet!");
         }
+    }
+
+    public ExportStatus getExportStatus(Long quizId) {
+        Optional<KahootAccountEntity> kahootAccountEntityOptional = kahootAccountRepository.findFirstByOrderByUuid();
+        if (kahootAccountEntityOptional.isEmpty()) {
+            return ExportStatus.NOT_EXPORTED;
+        }
+        Optional<KahootQuizExportStatus> optionalKahootQuizExportStatus = kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccountEntityOptional.get().getUuid(), quizId);
+        return optionalKahootQuizExportStatus.map(KahootQuizExportStatus::getExportStatus).orElse(ExportStatus.NOT_EXPORTED);
     }
 }

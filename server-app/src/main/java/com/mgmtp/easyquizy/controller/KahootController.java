@@ -73,7 +73,8 @@ public class KahootController {
             @ApiResponse(responseCode = "200", description = "Export a quiz successfully",
                     content = {@Content(mediaType = "application/json")}
             ),
-            @ApiResponse(responseCode = "401", description = "Kahoot authentication fail")
+            @ApiResponse(responseCode = "401", description = "Kahoot authentication fail"),
+            @ApiResponse(responseCode = "400", description = "Quiz already exported")
     })
     @PostMapping("/export/quiz/{id}")
     public ResponseEntity<Object> exportQuiz(@Parameter(description = "The id of the quiz to export") @PathVariable long id) {

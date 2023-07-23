@@ -3,28 +3,35 @@ package com.mgmtp.easyquizy.mapper;
 import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
+import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
+import com.mgmtp.easyquizy.service.KahootService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface QuizMapper {
+public abstract class QuizMapper {
+    @Autowired
+    protected KahootService kahootService;
+
     @Mapping(target = "eventId", source = "eventEntity.id")
     @Mapping(target = "totalTime", ignore = true)
-    QuizDTO quizEntityToQuizDTO(QuizEntity quizEntity);
+    @Mapping(target = "exportStatus", expression = "java(getExportStatus(quizEntity))")
+    public abstract QuizDTO quizEntityToQuizDTO(QuizEntity quizEntity);
 
     @Mapping(target = "event", source = "eventEntity")
     @Mapping(target = "totalTime", ignore = true)
     @Mapping(target = "questions", source = "questions", qualifiedByName = "customMappingQuestion")
-    QuizDtoDetail quizEntityToQuizDtoDetail(QuizEntity quizEntity);
+    public abstract QuizDtoDetail quizEntityToQuizDtoDetail(QuizEntity quizEntity);
 
     @Named("customMappingQuestion")
-    default List<QuestionListViewDTO> customMappingQuestion(List<QuestionEntity> questionEntities) {
+    List<QuestionListViewDTO> customMappingQuestion(List<QuestionEntity> questionEntities) {
         if (questionEntities == null) {
             return Collections.emptyList();
         }
@@ -37,5 +44,12 @@ public interface QuizMapper {
                         .difficulty(questionEntity.getDifficulty())
                         .build())
                 .toList();
+    }
+
+    @Mapping(target = "eventEntity", source = "event")
+    public abstract QuizEntity quizDtoDetailToQuizEntity(QuizDtoDetail quizDtoDetail);
+
+    public ExportStatus getExportStatus(QuizEntity quizEntity) {
+        return kahootService.getExportStatus(quizEntity.getId());
     }
 }

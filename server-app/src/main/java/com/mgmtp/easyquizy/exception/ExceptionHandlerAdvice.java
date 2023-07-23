@@ -32,10 +32,10 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
      * Creates a map containing the error message of the given exception.
      *
      * @param errorName the key to use for the error message in the map
-     * @param ex the exception to get the error message from
+     * @param ex        the exception to get the error message from
      * @return a map containing the error message of the given exception
      */
-    private Map<String, String> getError(String errorName, Exception ex){
+    private Map<String, String> getError(String errorName, Exception ex) {
         Map<String, String> errors = new HashMap<>();
         String message = ex.getMessage();
         errors.put(errorName, message);
@@ -212,7 +212,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {IllegalStateException.class})
     @ResponseBody
     public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
-        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME,ex), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -224,7 +224,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {QuestionAssociatedWithQuizzesException.class})
     @ResponseBody
     public ResponseEntity<Object> handleQuestionAssociatedWithQuizzesException(QuestionAssociatedWithQuizzesException ex) {
-        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME,ex), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {KahootUnauthorizedException.class})
@@ -248,11 +248,20 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     /**
      * Handles UnsatisfiableQuizConstraintsException by returning a ResponseEntity with an error message and the corresponding HttpStatus.
      * UnsatisfiableQuizConstraintsException is thrown when it is not possible to generate a quiz that meets the given constraints.
-     *
      */
     @ExceptionHandler(value = {UnsatisfiableQuizConstraintsException.class})
     @ResponseBody
     public ResponseEntity<Object> handleUnsatisfiableQuizConstraintsException(UnsatisfiableQuizConstraintsException ex) {
+        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles KahootExportQuizException by returning a ResponseEntity with an error message and the corresponding HttpStatus.
+     * KahootExportQuizException is thrown when there is an error exporting a quiz to Kahoot account.
+     */
+    @ExceptionHandler(value = {KahootExportQuizException.class})
+    @ResponseBody
+    public ResponseEntity<Object> handleKahootExportQuizException(KahootExportQuizException ex) {
         return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,9 +1,13 @@
 package com.mgmtp.easyquizy.dto.quiz;
 
+import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
@@ -24,4 +28,6 @@ public class QuizDTO {
     private List<Long> questionIds;
 
     private Integer totalTime;
+
+    private ExportStatus exportStatus;
 }

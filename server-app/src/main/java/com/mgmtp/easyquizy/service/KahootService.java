@@ -4,6 +4,7 @@ import com.mgmtp.easyquizy.dto.kahoot.KahootAuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
+import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 
 import javax.crypto.BadPaddingException;
@@ -29,6 +30,7 @@ public interface KahootService {
     SecretKey generateSecretKey(byte[] keyBytes) throws NoSuchAlgorithmException, NoSuchProviderException;
 
     KahootAccountEntity getUserByExistingCredentials(String username, String password);
+
     String encryptPassword(String plaintext, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException;
 
@@ -40,4 +42,6 @@ public interface KahootService {
     ConcurrentMap<Long, String> uploadImages(AttachmentEntity[] attachments, String token);
 
     void deleteKahootQuiz(long quizId);
+
+    ExportStatus getExportStatus(Long quizId);
 }
