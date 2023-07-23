@@ -1,7 +1,7 @@
 package com.mgmtp.easyquizy.dto.quiz;
 
 import com.mgmtp.easyquizy.dto.event.EventDTO;
-import com.mgmtp.easyquizy.dto.question.QuestionDTO;
+import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +20,7 @@ public class QuizDtoDetail {
 
     private EventDTO event;
 
-    private List<QuestionDTO> questions;
+    private List<QuestionListViewDTO> questions;
 
     private Integer totalTime;
 }
