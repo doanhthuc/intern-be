@@ -37,8 +37,7 @@ public class KahootController {
             @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
     @PostMapping("/auth")
-    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody KahootAuthenticationRequestDTO kahootAuthenticationRequestDTO)
-            throws IllegalStateException {
+    public KahootUserStatusResponseDto authenticateKahoot(@Valid @RequestBody KahootAuthenticationRequestDTO kahootAuthenticationRequestDTO) {
         return kahootService.authenticate(kahootAuthenticationRequestDTO);
     }
 
@@ -90,7 +89,7 @@ public class KahootController {
             @ApiResponse(responseCode = "400", description = "Invalid folder name")
     })
     @PostMapping("/folders")
-    public ResponseEntity<KahootFolderDTO> createFolder(@RequestBody Map<String, String> requestBody) throws IllegalStateException {
+    public ResponseEntity<KahootFolderDTO> createFolder(@RequestBody Map<String, String> requestBody) {
         String folderName = requestBody.get("name");
         KahootFolderDTO folder = kahootService.getOrCreateFolder(folderName);
         return ResponseEntity.ok(folder);

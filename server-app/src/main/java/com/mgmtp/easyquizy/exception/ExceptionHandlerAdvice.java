@@ -204,18 +204,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles IllegalStateException by returning a ResponseEntity with an error message and the HttpStatus.BAD_REQUEST.
-     * IllegalStateException is thrown when the application is in an inconsistent state.
-     *
-     * @return a ResponseEntity with an error message and the HttpStatus.BAD_REQUEST
-     */
-    @ExceptionHandler(value = {IllegalStateException.class})
-    @ResponseBody
-    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
-        return new ResponseEntity<>(getError(DEFAULT_ERROR_NAME, ex), HttpStatus.BAD_REQUEST);
-    }
-
-    /**
      * Handles QuestionAssociatedWithQuizzesException by returning a ResponseEntity with an error message and HttpStatus.BAD_REQUEST.
      * QuestionAssociatedWithQuizzesException is thrown when an attempt is made to delete a question that is associated with quizzes.
      *

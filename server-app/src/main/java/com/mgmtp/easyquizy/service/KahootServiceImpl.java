@@ -176,7 +176,7 @@ public class KahootServiceImpl implements KahootService {
         } catch (HttpErrorStatusException e) {
             if (e.getStatusCode() == 401) {
                 kahootAccountRepository.deleteAll();
-                throw new IllegalStateException("Username or password error!");
+                throw new KahootUnauthorizedException();
             }
         }
 
@@ -224,7 +224,7 @@ public class KahootServiceImpl implements KahootService {
                     .setJsonRequestBody(Collections.singletonMap("name", folderName))
                     .call(KahootFolderDTO.class);
         } catch (HttpErrorStatusException ex) {
-            throw new IllegalStateException("Failed to create new Kahoot folder!");
+            throw new KahootException("Failed to create new Kahoot folder!");
         }
     }
 
@@ -234,7 +234,7 @@ public class KahootServiceImpl implements KahootService {
         synchronized (folderName.intern()) {
             KahootAccountEntity kahootAccount = getKahootAccount();
             if (kahootAccount == null) {
-                throw new IllegalStateException("No valid Kahoot account found!");
+                throw new KahootUnauthorizedException();
             }
             String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
             KahootFolderDTO kahootFolderDTO;
@@ -246,7 +246,7 @@ public class KahootServiceImpl implements KahootService {
                         .setMethod("GET")
                         .call(KahootFolderDTO.class);
             } catch (HttpErrorStatusException e) {
-                throw new IllegalStateException("Failed to retrieve Kahoot folder information!");
+                throw new KahootException("Failed to retrieve Kahoot folder information!");
             }
             Optional<KahootFolderDTO> existingFolder = Optional.ofNullable(kahootFolderDTO)
                     .orElseThrow(KahootUnauthorizedException::new)
