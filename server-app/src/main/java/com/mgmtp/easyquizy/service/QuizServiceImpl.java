@@ -25,7 +25,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -122,6 +124,10 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizDTO updateQuiz(QuizDTO quizDTO) throws RecordNotFoundException, DuplicatedQuestionException, NoMatchEventIdException {
+        if(quizDTO.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID is a required field");
+        }
+
         QuizEntity updatedQuiz = quizRepository.findById(quizDTO.getId())
                 .orElseThrow(() -> new RecordNotFoundException("No quiz records exist for the given id "));
         EventEntity eventEntity = eventRepository.findById(updatedQuiz.getEventEntity().getId())
