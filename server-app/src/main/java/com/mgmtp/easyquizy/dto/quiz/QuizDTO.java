@@ -30,4 +30,6 @@ public class QuizDTO {
     private Integer totalTime;
 
     private ExportStatus exportStatus;
+
+    private String kahootQuizId;
 }

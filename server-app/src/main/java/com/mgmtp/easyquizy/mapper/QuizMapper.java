@@ -4,12 +4,11 @@ import com.mgmtp.easyquizy.dto.question.QuestionListViewDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDTO;
 import com.mgmtp.easyquizy.dto.quiz.QuizDtoDetail;
 import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
+import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
 import com.mgmtp.easyquizy.service.KahootService;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -22,7 +21,6 @@ public abstract class QuizMapper {
 
     @Mapping(target = "eventId", source = "eventEntity.id")
     @Mapping(target = "totalTime", ignore = true)
-    @Mapping(target = "exportStatus", expression = "java(getExportStatus(quizEntity))")
     public abstract QuizDTO quizEntityToQuizDTO(QuizEntity quizEntity);
 
     @Mapping(target = "event", source = "eventEntity")
@@ -49,7 +47,14 @@ public abstract class QuizMapper {
     @Mapping(target = "eventEntity", source = "event")
     public abstract QuizEntity quizDtoDetailToQuizEntity(QuizDtoDetail quizDtoDetail);
 
-    public ExportStatus getExportStatus(QuizEntity quizEntity) {
-        return kahootService.getExportStatus(quizEntity.getId());
+    @AfterMapping
+    protected void setExportStatusAndKahootQuizId(QuizEntity quizEntity, @MappingTarget QuizDTO quizDTO) {
+        KahootQuizExportStatus kahootQuizExportStatus = kahootService.getKahootQuizExportStatus(quizDTO.getId());
+        if (kahootQuizExportStatus != null) {
+            quizDTO.setExportStatus(kahootQuizExportStatus.getExportStatus());
+            quizDTO.setKahootQuizId(kahootQuizExportStatus.getKahootQuizId());
+        } else {
+            quizDTO.setExportStatus(ExportStatus.NOT_EXPORTED);
+        }
     }
 }

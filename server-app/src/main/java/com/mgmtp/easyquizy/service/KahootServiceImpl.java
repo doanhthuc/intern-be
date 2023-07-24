@@ -294,8 +294,8 @@ public class KahootServiceImpl implements KahootService {
             throw new RecordNotFoundException("The quiz with id " + id + " does not exist");
         }
 
-        ExportStatus exportStatus = getExportStatus(id);
-        if (exportStatus == ExportStatus.EXPORTED || exportStatus == ExportStatus.EXPORTING) {
+        KahootQuizExportStatus existingKahootQuizExportStatus = getKahootQuizExportStatus(id);
+        if (existingKahootQuizExportStatus != null) {
             throw new KahootExportQuizException("This quiz is already exporting or has been exported to this kahoot account!");
         }
 
@@ -396,12 +396,10 @@ public class KahootServiceImpl implements KahootService {
         }
     }
 
-    public ExportStatus getExportStatus(Long quizId) {
+    public KahootQuizExportStatus getKahootQuizExportStatus(Long quizId) {
         Optional<KahootAccountEntity> kahootAccountEntityOptional = kahootAccountRepository.findFirstByOrderByUuid();
-        if (kahootAccountEntityOptional.isEmpty()) {
-            return ExportStatus.NOT_EXPORTED;
-        }
-        Optional<KahootQuizExportStatus> optionalKahootQuizExportStatus = kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccountEntityOptional.get().getUuid(), quizId);
-        return optionalKahootQuizExportStatus.map(KahootQuizExportStatus::getExportStatus).orElse(ExportStatus.NOT_EXPORTED);
+        return kahootAccountEntityOptional.
+                flatMap(kahootAccountEntity -> kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccountEntity.getUuid(), quizId))
+                .orElse(null);
     }
 }

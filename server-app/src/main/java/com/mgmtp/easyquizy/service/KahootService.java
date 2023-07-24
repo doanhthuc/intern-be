@@ -4,8 +4,8 @@ import com.mgmtp.easyquizy.dto.kahoot.KahootAuthenticationRequestDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootFolderDTO;
 import com.mgmtp.easyquizy.dto.kahoot.KahootUserStatusResponseDto;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
-import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
+import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -43,5 +43,5 @@ public interface KahootService {
 
     void deleteKahootQuiz(long quizId);
 
-    ExportStatus getExportStatus(Long quizId);
+    KahootQuizExportStatus getKahootQuizExportStatus(Long quizId);
 }
