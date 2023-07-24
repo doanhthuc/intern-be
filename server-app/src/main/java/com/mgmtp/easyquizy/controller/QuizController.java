@@ -88,6 +88,7 @@ public class QuizController {
             @RequestParam(name = "offset", defaultValue = "0")
             @Min(value = 0, message = "Offset must be greater than or equal to 0") int offset,
             @Parameter(description = "The maximum number of results to return")
+            @Min(value = 1, message = "Limit must be greater than or equal to 1")
             @RequestParam(name = "limit", required = false) Integer limit,
             @Parameter(description = "The keyword to search for")
             @RequestParam(name = "keyword", required = false) String keyword) {
