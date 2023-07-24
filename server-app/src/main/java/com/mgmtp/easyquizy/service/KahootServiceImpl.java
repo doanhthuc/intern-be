@@ -101,7 +101,7 @@ public class KahootServiceImpl implements KahootService {
                     .setMethod("GET")
                     .call(KahootUserResponseDto.class);
         } catch (HttpErrorStatusException e) {
-            if (e.getStatusCode() == 401 || e.getStatusCode() == 400) {
+            if (e.getStatusCode() / 100 == 4) {
                 KahootAccountEntity getKahootByCredentials = getUserByExistingCredentials(kahootUsername, kahootPassword);
                 if (getKahootByCredentials != null) {
                     kahootAccountEntity = getKahootByCredentials;

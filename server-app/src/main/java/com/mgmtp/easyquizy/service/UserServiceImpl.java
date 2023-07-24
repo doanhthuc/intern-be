@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(pageNo, limit, Sort.by("id").descending());
 
         Page<UserEntity> page = userRepository.findAll(filterSpec, pageable);
         return page.map(userMapper::entityToUserDTO);
