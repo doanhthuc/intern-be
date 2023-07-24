@@ -16,7 +16,7 @@ public class QuizGenerator {
      * @param categoryPercentages A map containing category IDs as keys and corresponding percentages as values,
      *                            representing the maximum time percentage allowed for each category.
      * @return A list of QuestionEntity objects representing the generated quiz.
-     * @throws UnsatisfiableQuizConstraintsException  if the quiz cannot be generated to meet the constraints.
+     * @throws UnsatisfiableQuizConstraintsException if the quiz cannot be generated to meet the constraints.
      */
     public static List<QuestionEntity> generateQuiz(List<QuestionEntity> questions, int totalTime, Map<Long, Double> categoryPercentages) {
 
@@ -100,7 +100,7 @@ public class QuizGenerator {
             }
         }
 
-        if (quizTotalTime < totalTime - 60) {
+        if (quizTotalTime < totalTime - 60 || quiz.isEmpty()) {
             throw new UnsatisfiableQuizConstraintsException();
         }
 
