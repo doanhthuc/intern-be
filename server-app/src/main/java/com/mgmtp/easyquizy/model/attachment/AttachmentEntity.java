@@ -28,6 +28,9 @@ public class AttachmentEntity {
     private String sourceCode;
 
     @Column
+    private String languageType;
+
+    @Column
     private String kahootUrl;
 
     @Column

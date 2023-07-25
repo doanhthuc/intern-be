@@ -19,5 +19,7 @@ public class AttachmentDTO {
 
     private String sourceCode;
 
+    private String languageType;
+
     private String kahootUrl;
 }
