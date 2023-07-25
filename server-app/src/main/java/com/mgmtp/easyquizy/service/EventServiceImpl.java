@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Integer> getAllYear() {
-        return eventRepository.findDistinctByStartDate_Year();
+        return eventRepository.findDistinctByStartDateYear();
     }
 
     @Override
