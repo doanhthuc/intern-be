@@ -73,12 +73,25 @@ public class KahootController {
                     content = {@Content(mediaType = "application/json")}
             ),
             @ApiResponse(responseCode = "401", description = "Kahoot authentication fail"),
-            @ApiResponse(responseCode = "400", description = "Quiz already exported")
+            @ApiResponse(responseCode = "400", description = "Quiz already exported/ Kahoot authentication fail")
     })
     @PostMapping("/export/quiz/{id}")
     public ResponseEntity<Object> exportQuiz(@Parameter(description = "The id of the quiz to export") @PathVariable long id) {
         kahootService.exportQuiz(id);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Export an event", security = {@SecurityRequirement(name = "bearer-key")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Export an event successfully",
+                    content = {@Content(mediaType = "application/json")}
+            ),
+            @ApiResponse(responseCode = "401", description = "Authentication fail"),
+            @ApiResponse(responseCode = "400", description = "Kahoot authentication fail")
+    })
+    @PostMapping("/export/event/{id}")
+    public String exportEvent(@Parameter(description = "The id of the event to export") @PathVariable long id) {
+        return kahootService.exportEvent(id);
     }
 
     @Operation(summary = "Create a new folder on Kahoot", security = {@SecurityRequirement(name = "bearer-key")})

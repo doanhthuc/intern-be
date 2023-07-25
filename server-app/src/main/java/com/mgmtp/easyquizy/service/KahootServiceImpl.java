@@ -10,16 +10,14 @@ import com.mgmtp.easyquizy.exception.kahoot.*;
 import com.mgmtp.easyquizy.mapper.KahootAccountMapper;
 import com.mgmtp.easyquizy.mapper.KahootQuizMapper;
 import com.mgmtp.easyquizy.model.attachment.AttachmentEntity;
+import com.mgmtp.easyquizy.model.event.EventEntity;
 import com.mgmtp.easyquizy.model.kahoot.ExportStatus;
 import com.mgmtp.easyquizy.model.kahoot.KahootAccountEntity;
 import com.mgmtp.easyquizy.model.kahoot.KahootQuizExportStatus;
 import com.mgmtp.easyquizy.model.kahoot.QuizUserId;
 import com.mgmtp.easyquizy.model.question.QuestionEntity;
 import com.mgmtp.easyquizy.model.quiz.QuizEntity;
-import com.mgmtp.easyquizy.repository.KahootAccountRepository;
-import com.mgmtp.easyquizy.repository.KahootQuizExportStatusRepository;
-import com.mgmtp.easyquizy.repository.QuestionRepository;
-import com.mgmtp.easyquizy.repository.QuizRepository;
+import com.mgmtp.easyquizy.repository.*;
 import com.mgmtp.easyquizy.utils.ConvertBase64ToFile;
 import com.mgmtp.easyquizy.utils.RestClient;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +57,8 @@ public class KahootServiceImpl implements KahootService {
     private final KahootAccountRepository kahootAccountRepository;
 
     private final QuizRepository quizRepository;
+
+    private final EventRepository eventRepository;
 
     private final KahootQuizExportStatusRepository kahootQuizExportStatusRepository;
 
@@ -187,6 +187,7 @@ public class KahootServiceImpl implements KahootService {
             SecretKey secretKey = generateSecretKey(keyBytes);
             String encryptedPassword = encryptPassword(authenticationRequest.getPassword(), secretKey);
             kahootAccountEntity.setKahootPassword(encryptedPassword);
+            kahootAccountRepository.deleteAll();
             kahootAccountRepository.save(kahootAccountEntity);
         } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException |
                  IllegalBlockSizeException | NoSuchPaddingException | NoSuchProviderException e) {
@@ -210,10 +211,7 @@ public class KahootServiceImpl implements KahootService {
 
     @Override
     public KahootFolderDTO createFolder(String folderName) {
-        KahootAccountEntity kahootAccount = getKahootAccount();
-        if (kahootAccount == null) {
-            throw new KahootUnauthorizedException();
-        }
+        KahootAccountEntity kahootAccount = validateKahootAccount();
         String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
         try {
             return new RestClient()
@@ -232,10 +230,7 @@ public class KahootServiceImpl implements KahootService {
     @SuppressWarnings("squid:S1860")
     public KahootFolderDTO getOrCreateFolder(String folderName) {
         synchronized (folderName.intern()) {
-            KahootAccountEntity kahootAccount = getKahootAccount();
-            if (kahootAccount == null) {
-                throw new KahootUnauthorizedException();
-            }
+            KahootAccountEntity kahootAccount = validateKahootAccount();
             String rootFolderUrl = String.format(FOLDER_URL_TEMPLATE, kahootAccount.getUuid());
             KahootFolderDTO kahootFolderDTO;
             try {
@@ -284,10 +279,7 @@ public class KahootServiceImpl implements KahootService {
 
     @Override
     public void exportQuiz(long id) {
-        KahootAccountEntity kahootAccount = getKahootAccount();
-        if (kahootAccount == null) {
-            throw new KahootUnauthorizedException();
-        }
+        KahootAccountEntity kahootAccount = validateKahootAccount();
 
         Optional<QuizEntity> quiz = quizRepository.findById(id);
         if (quiz.isEmpty()) {
@@ -309,24 +301,7 @@ public class KahootServiceImpl implements KahootService {
                 .build();
         kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
 
-        List<QuestionEntity> questionsHaveUnUploadedImage = quiz.get().getQuestions().stream()
-                .filter(question -> question.getAttachment() != null && !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
-                .toList();
-
-        if (!questionsHaveUnUploadedImage.isEmpty()) {
-            AttachmentEntity[] attachments = questionsHaveUnUploadedImage.stream()
-                    .map(QuestionEntity::getAttachment)
-                    .toArray(AttachmentEntity[]::new);
-
-            ConcurrentMap<Long, String> concurrentMap = uploadImages(attachments, kahootAccount.getAccessToken());
-            questionsHaveUnUploadedImage.forEach(question -> {
-                String imageUri = concurrentMap.get(question.getAttachment().getId());
-                question.getAttachment().setKahootUrl(imageUri);
-                question.getAttachment().setIsUploaded(true);
-            });
-
-            questionRepository.saveAll(questionsHaveUnUploadedImage);
-        }
+        uploadNotUploadedImages(quiz.get(), kahootAccount.getAccessToken());
 
         RestClient restClient = new RestClient()
                 .setBearerToken(kahootAccount.getAccessToken())
@@ -335,14 +310,18 @@ public class KahootServiceImpl implements KahootService {
         String eventName = quiz.get().getEventEntity().getTitle();
         String folderId = getOrCreateFolder(eventName).getId();
 
-        KahootQuizDTO kahootQuizDTO = kahootQuizMapper.quizToKahootQuizDTO(quiz.get(), folderId);
-        KahootCreateDraftRequestDTO kahootCreateDraftRequestDTO = new KahootCreateDraftRequestDTO(kahootQuizDTO);
+        exportQuiz(quiz.get(), folderId, restClient, kahootAccount);
+    }
 
-        KahootExportQuizResponseDTO kahootExportQuizResponseDTO = createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
-
-        kahootQuizExportStatus.setKahootQuizId(kahootExportQuizResponseDTO.getKahootQuizId());
-        kahootQuizExportStatus.setExportStatus(ExportStatus.EXPORTED);
-        kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
+    private void exportQuiz(QuizEntity quiz, String folderId, RestClient restClient, KahootAccountEntity kahootAccount) {
+        KahootCreateDraftRequestDTO kahootCreateDraftRequestDTO = new KahootCreateDraftRequestDTO(kahootQuizMapper.quizToKahootQuizDTO(quiz, folderId));
+        KahootExportQuizResponseDTO response = createAndPublishQuiz(restClient, kahootCreateDraftRequestDTO);
+        Optional<KahootQuizExportStatus> kahootQuizExportStatusOptional = kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccount.getUuid(), quiz.getId());
+        kahootQuizExportStatusOptional.ifPresent(kahootQuizExportStatus -> {
+            kahootQuizExportStatus.setKahootQuizId(response.getKahootQuizId());
+            kahootQuizExportStatus.setExportStatus(ExportStatus.EXPORTED);
+            kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
+        });
     }
 
     @Override
@@ -375,8 +354,9 @@ public class KahootServiceImpl implements KahootService {
     public void deleteKahootQuiz(long quizId) {
         KahootAccountEntity kahootAccount = getKahootAccount();
         if (kahootAccount == null) {
-            throw new KahootUnauthorizedException();
+            return;
         }
+
         Optional<KahootQuizExportStatus> kahootQuizExportStatus =
                 kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccount.getUuid(), quizId);
         if (kahootQuizExportStatus.isPresent()) {
@@ -391,8 +371,6 @@ public class KahootServiceImpl implements KahootService {
             } catch (HttpErrorStatusException ignored) {
                 log.error("The Kahoot quiz has been deleted in the Kahoot app.");
             }
-        } else {
-            throw InvalidFieldsException.fromFieldError("deleteKahootQuiz", "The quiz has not been exported yet!");
         }
     }
 
@@ -401,5 +379,78 @@ public class KahootServiceImpl implements KahootService {
         return kahootAccountEntityOptional.
                 flatMap(kahootAccountEntity -> kahootQuizExportStatusRepository.findByKahootUserIdAndQuizId(kahootAccountEntity.getUuid(), quizId))
                 .orElse(null);
+    }
+
+    @Override
+    public String exportEvent(long id) {
+        KahootAccountEntity kahootAccount = validateKahootAccount();
+
+        Optional<EventEntity> optionalEvent = eventRepository.findById(id);
+        EventEntity event = optionalEvent.orElseThrow(() -> new RecordNotFoundException("The event with id " + id + " does not exist"));
+
+        List<QuizEntity> quizzesToExport = event.getQuizEntity().stream()
+                .filter(quizEntity -> !kahootQuizExportStatusRepository.existsByKahootUserIdAndQuizId(kahootAccount.getUuid(), quizEntity.getId()))
+                .toList();
+
+        quizzesToExport.forEach(quiz -> {
+            KahootQuizExportStatus kahootQuizExportStatus = KahootQuizExportStatus.builder()
+                    .quizUserId(
+                            QuizUserId.builder()
+                                    .quizId(quiz.getId())
+                                    .kahootUserId(kahootAccount.getUuid())
+                                    .build()
+                    )
+                    .exportStatus(ExportStatus.EXPORTING)
+                    .build();
+            kahootQuizExportStatusRepository.save(kahootQuizExportStatus);
+        });
+
+        String kahootAccessToken = kahootAccount.getAccessToken();
+        quizzesToExport.forEach(quiz -> {
+            uploadNotUploadedImages(quiz, kahootAccessToken);
+        });
+
+        RestClient restClient = new RestClient()
+                .setBearerToken(kahootAccount.getAccessToken())
+                .setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        String eventName = event.getTitle();
+        String folderId = getOrCreateFolder(eventName).getId();
+
+        for (QuizEntity quiz : quizzesToExport) {
+            exportQuiz(quiz, folderId, restClient, kahootAccount);
+        }
+
+        return folderId;
+    }
+
+    @Override
+    public KahootAccountEntity validateKahootAccount() {
+        KahootAccountEntity kahootAccount = getKahootAccount();
+        if (kahootAccount != null) {
+            return kahootAccount;
+        }
+        throw new KahootUnauthorizedException();
+    }
+
+    void uploadNotUploadedImages(QuizEntity quiz, String kahootAccessToken) {
+        List<QuestionEntity> questionsHaveUnUploadedImage = quiz.getQuestions().stream()
+                .filter(question -> question.getAttachment() != null && !question.getAttachment().getIsUploaded() && question.getAttachment().getImageData() != null)
+                .toList();
+
+        if (!questionsHaveUnUploadedImage.isEmpty()) {
+            AttachmentEntity[] attachments = questionsHaveUnUploadedImage.stream()
+                    .map(QuestionEntity::getAttachment)
+                    .toArray(AttachmentEntity[]::new);
+
+            ConcurrentMap<Long, String> concurrentMap = uploadImages(attachments, kahootAccessToken);
+            questionsHaveUnUploadedImage.forEach(question -> {
+                String imageUri = concurrentMap.get(question.getAttachment().getId());
+                question.getAttachment().setKahootUrl(imageUri);
+                question.getAttachment().setIsUploaded(true);
+            });
+
+            questionRepository.saveAll(questionsHaveUnUploadedImage);
+        }
     }
 }
